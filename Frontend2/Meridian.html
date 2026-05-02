@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian — Project Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="vanguard.css" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="icons.jsx"></script>
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="interactions.jsx"></script>
+  <script type="text/babel" src="detail-modals.jsx"></script>
+  <script type="text/babel" src="shell.jsx"></script>
+  <script type="text/babel" src="views-main.jsx"></script>
+  <script type="text/babel" src="views-detail.jsx"></script>
+  <script type="text/babel" src="views-more.jsx"></script>
+  <script type="text/babel" src="views-settings.jsx"></script>
+  <script type="text/babel" src="views-chat.jsx"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "accent": "rose",
+      "theme": "dark",
+      "density": "relaxed",
+      "sidebar": "expanded",
+      "cardStyle": "detailed"
+    }/*EDITMODE-END*/;
+
+    const ACCENT_MAP = {
+      lime:   { c: "oklch(0.85 0.17 145)", dim: "oklch(0.40 0.10 145)", soft: "oklch(0.30 0.06 145)", fg: "oklch(0.20 0.05 145)" },
+      cyan:   { c: "oklch(0.78 0.13 220)", dim: "oklch(0.40 0.09 220)", soft: "oklch(0.30 0.06 220)", fg: "oklch(0.18 0.04 220)" },
+      violet: { c: "oklch(0.72 0.18 300)", dim: "oklch(0.40 0.10 300)", soft: "oklch(0.30 0.07 300)", fg: "oklch(0.98 0.03 300)" },
+      amber:  { c: "oklch(0.80 0.14 75)",  dim: "oklch(0.44 0.09 75)",  soft: "oklch(0.30 0.06 75)",  fg: "oklch(0.20 0.04 75)" },
+      rose:   { c: "oklch(0.72 0.17 20)",  dim: "oklch(0.40 0.10 20)",  soft: "oklch(0.30 0.07 20)",  fg: "oklch(0.98 0.03 20)" },
+    };
+
+    function App() {
+      const [settings, setSettings] = React.useState(() => {
+        try {
+          const saved = JSON.parse(localStorage.getItem("meridian-settings"));
+          return { ...TWEAK_DEFAULTS, ...(saved || {}) };
+        } catch { return TWEAK_DEFAULTS; }
+      });
+      const [view, setView] = React.useState(() => localStorage.getItem("meridian-view") || "home");
+      const [issueId, setIssueId] = React.useState("AUR-412");
+      const [paletteOpen, setPaletteOpen] = React.useState(false);
+      const [inboxOpen, setInboxOpen] = React.useState(false);
+      const [tweaksOpen, setTweaksOpen] = React.useState(false);
+
+      // Apply theme + accent to :root
+      React.useEffect(() => {
+        document.documentElement.dataset.theme = settings.theme;
+        document.documentElement.dataset.density = settings.density;
+        const a = ACCENT_MAP[settings.accent] || ACCENT_MAP.lime;
+        document.documentElement.style.setProperty("--accent", a.c);
+        document.documentElement.style.setProperty("--accent-dim", a.dim);
+        document.documentElement.style.setProperty("--accent-soft", a.soft);
+        document.documentElement.style.setProperty("--accent-fg", a.fg);
+        localStorage.setItem("meridian-settings", JSON.stringify(settings));
+      }, [settings]);
+
+      React.useEffect(() => {
+        localStorage.setItem("meridian-view", view);
+      }, [view]);
+
+      // Keyboard shortcuts
+      React.useEffect(() => {
+        const onKey = (e) => {
+          const tag = e.target.tagName;
+          const typing = tag === "INPUT" || tag === "TEXTAREA";
+          if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+            e.preventDefault();
+            setPaletteOpen(true);
+          } else if (e.key === "Escape") {
+            setPaletteOpen(false);
+            setInboxOpen(false);
+          } else if (!typing && !e.metaKey && !e.ctrlKey) {
+            if (e.key === "g") {
+              window.__g = true;
+              setTimeout(() => { window.__g = false; }, 900);
+            } else if (window.__g) {
+              const map = { h: "home", i: "inbox", s: "issues", d: "docs", r: "roadmap", p: "prs", t: "team" };
+              if (map[e.key]) { setView(map[e.key]); window.__g = false; }
+            } else if (e.key === "c") {
+              e.preventDefault();
+              window.openNewIssue();
+            } else if (e.key === "?") {
+              window.toast("Shortcuts: ⌘K · C new issue · G+letter to jump");
+            }
+          }
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+      }, []);
+
+      // Edit-mode integration (Tweaks toolbar)
+      React.useEffect(() => {
+        const onMsg = (e) => {
+          if (!e.data || typeof e.data !== "object") return;
+          if (e.data.type === "__activate_edit_mode") setTweaksOpen(true);
+          if (e.data.type === "__deactivate_edit_mode") setTweaksOpen(false);
+        };
+        window.addEventListener("message", onMsg);
+        window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+        return () => window.removeEventListener("message", onMsg);
+      }, []);
+
+      // Persist settings to host
+      const setSettingsPersist = React.useCallback((updater) => {
+        setSettings(prev => {
+          const next = typeof updater === "function" ? updater(prev) : updater;
+          window.parent.postMessage({ type: "__edit_mode_set_keys", edits: next }, "*");
+          return next;
+        });
+      }, []);
+
+      const renderView = () => {
+        switch (view) {
+          case "home":    return <HomeView setView={setView} setIssueId={setIssueId} cardStyle={settings.cardStyle} />;
+          case "inbox":   return <InboxView />;
+          case "issues":  return <IssuesView setView={setView} setIssueId={setIssueId} cardStyle={settings.cardStyle} />;
+          case "issue":   return <IssueDetail issueId={issueId} setView={setView} />;
+          case "sprints": return <SprintsView setView={setView} setIssueId={setIssueId} />;
+          case "roadmap": return <RoadmapView />;
+          case "docs":    return <DocsView />;
+          case "prs":     return <PRsView />;
+          case "team":    return <TeamView />;
+          case "settings": return <SettingsView settings={settings} setSettings={setSettingsPersist} />;
+          case "chat":    return <ChatView />;
+          default:        return <HomeView setView={setView} setIssueId={setIssueId} />;
+        }
+      };
+
+      return (
+        <div className="app" data-sidebar={settings.sidebar} data-screen-label={view}>
+          <Sidebar view={view} setView={setView} collapsed={settings.sidebar === "collapsed"} />
+          <Topbar
+            view={view}
+            theme={settings.theme}
+            setTheme={(t) => setSettingsPersist(s => ({ ...s, theme: t }))}
+            onToggleSidebar={() => setSettingsPersist(s => ({ ...s, sidebar: s.sidebar === "collapsed" ? "expanded" : "collapsed" }))}
+            onOpenPalette={() => setPaletteOpen(true)}
+            onOpenInbox={() => setInboxOpen(o => !o)}
+            onOpenTweaks={() => setTweaksOpen(o => !o)}
+          />
+          <main className="main">{renderView()}</main>
+
+          <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} setView={setView} />
+          <InboxPanel open={inboxOpen} onClose={() => setInboxOpen(false)} />
+          <TweaksPanel open={tweaksOpen} onClose={() => setTweaksOpen(false)} settings={settings} setSettings={setSettingsPersist} />
+          <HintBar onOpenPalette={() => setPaletteOpen(true)} />
+          <ModalHost />
+          <Toaster />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>

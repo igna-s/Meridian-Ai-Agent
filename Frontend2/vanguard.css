@@ -1,0 +1,387 @@
+/* Vanguard layer — gradients, glow, animations on top of base styles.css */
+
+/* Animated aurora backdrop */
+.app {
+  position: relative;
+  isolation: isolate;
+}
+.app::before {
+  content: "";
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 0%, color-mix(in oklch, var(--accent) 18%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 10%, color-mix(in oklch, var(--violet) 16%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 100%, color-mix(in oklch, var(--cyan) 12%, transparent) 0%, transparent 60%);
+  filter: blur(40px);
+  z-index: -1;
+  pointer-events: none;
+  animation: aurora 24s ease-in-out infinite alternate;
+}
+[data-theme="light"] .app::before {
+  opacity: 0.45;
+}
+@keyframes aurora {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(3%, -2%) scale(1.08); }
+  66%  { transform: translate(-2%, 3%) scale(0.95); }
+  100% { transform: translate(2%, 2%) scale(1.05); }
+}
+
+/* Sidebar + topbar become slightly translucent over aurora */
+.sidebar, .topbar {
+  background: color-mix(in oklch, var(--bg-1) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.topbar { background: color-mix(in oklch, var(--bg-0) 72%, transparent); }
+
+/* Gradient brand logo — conic, rotating */
+.sb-logo {
+  background: conic-gradient(from 0deg,
+    var(--accent),
+    var(--violet),
+    var(--cyan),
+    var(--amber),
+    var(--accent));
+  animation: logo-spin 18s linear infinite;
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--accent) 40%, transparent),
+    0 0 24px -4px color-mix(in oklch, var(--accent) 50%, transparent);
+}
+.sb-logo::after {
+  mask: radial-gradient(circle at 30% 30%, #000 35%, transparent 36%);
+}
+@keyframes logo-spin { to { transform: rotate(360deg); } }
+
+/* Accent primary button — gradient + glow */
+.btn.primary {
+  background: linear-gradient(135deg,
+    var(--accent) 0%,
+    color-mix(in oklch, var(--accent) 60%, var(--cyan)) 100%);
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--accent) 30%, transparent),
+    0 6px 20px -8px color-mix(in oklch, var(--accent) 80%, transparent),
+    inset 0 1px 0 color-mix(in oklch, white 20%, transparent);
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1), box-shadow 180ms;
+}
+.btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--accent) 40%, transparent),
+    0 10px 28px -8px color-mix(in oklch, var(--accent) 80%, transparent),
+    inset 0 1px 0 color-mix(in oklch, white 30%, transparent);
+  filter: none;
+}
+
+/* Card shimmer on hover */
+.card {
+  position: relative;
+  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1), border-color 200ms, box-shadow 240ms;
+  overflow: hidden;
+}
+.card::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg,
+    transparent 40%,
+    color-mix(in oklch, var(--accent) 6%, transparent) 55%,
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 400ms;
+  pointer-events: none;
+}
+.card:hover {
+  border-color: var(--border-strong);
+  box-shadow: 0 12px 32px -16px oklch(0 0 0 / 0.4);
+}
+.card:hover::after { opacity: 1; }
+
+/* Kanban cards: lift + subtle gradient border on hover */
+button.card { cursor: pointer; }
+button.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Sidebar item — animated gradient indicator */
+.sb-item { position: relative; transition: color 140ms; }
+.sb-item.active .sb-ind {
+  background: linear-gradient(180deg, var(--accent), color-mix(in oklch, var(--accent) 50%, var(--violet)));
+  box-shadow: 0 0 10px -2px var(--accent);
+}
+.sb-item.active {
+  background: linear-gradient(90deg,
+    color-mix(in oklch, var(--accent) 10%, transparent) 0%,
+    transparent 80%);
+}
+
+/* Topbar search — inner glow on focus */
+.search { transition: border-color 180ms, box-shadow 180ms; }
+.search:hover { border-color: var(--border-strong); }
+.search:focus-within {
+  border-color: color-mix(in oklch, var(--accent) 50%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 15%, transparent);
+}
+
+/* Status dots glow by state */
+.status.progress .s-dot { box-shadow: 0 0 8px -1px var(--status-progress); }
+.status.done .s-dot     { box-shadow: 0 0 8px -1px var(--status-done); }
+.status.review .s-dot   { box-shadow: 0 0 8px -1px var(--status-review); }
+.status.blocked .s-dot  { box-shadow: 0 0 8px -1px var(--status-blocked); }
+
+/* Chips — gradient fills for states */
+.chip { backdrop-filter: blur(6px); }
+
+/* Priority urgent — gentle pulse */
+.priority-pulse {
+  animation: pulse-urgent 1.8s ease-in-out infinite;
+}
+@keyframes pulse-urgent {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+/* Avatar — gradient ring for online */
+.avatar { position: relative; box-shadow: inset 0 0 0 1px color-mix(in oklch, white 10%, transparent); }
+
+/* Page transitions */
+.main > * {
+  animation: fade-slide 260ms cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes fade-slide {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Staggered list items */
+.stagger > * { animation: fade-slide 320ms cubic-bezier(0.2, 0, 0, 1) both; }
+.stagger > *:nth-child(1) { animation-delay: 20ms; }
+.stagger > *:nth-child(2) { animation-delay: 50ms; }
+.stagger > *:nth-child(3) { animation-delay: 80ms; }
+.stagger > *:nth-child(4) { animation-delay: 110ms; }
+.stagger > *:nth-child(5) { animation-delay: 140ms; }
+.stagger > *:nth-child(6) { animation-delay: 170ms; }
+.stagger > *:nth-child(7) { animation-delay: 200ms; }
+.stagger > *:nth-child(8) { animation-delay: 230ms; }
+
+/* Hero greeting — gradient text */
+.hero-title {
+  background: linear-gradient(120deg,
+    var(--fg-0) 0%,
+    var(--fg-0) 40%,
+    color-mix(in oklch, var(--accent) 70%, var(--fg-0)) 65%,
+    color-mix(in oklch, var(--violet) 80%, var(--fg-0)) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 8s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* Stat counters — editorial numerals */
+.stat-num {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  background: linear-gradient(180deg, var(--fg-0) 0%, color-mix(in oklch, var(--fg-0) 70%, var(--accent)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Segmented pill — animated selection glow */
+.segmented button.on {
+  background: linear-gradient(135deg,
+    color-mix(in oklch, var(--bg-3) 100%, transparent),
+    color-mix(in oklch, var(--accent) 12%, var(--bg-3)));
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.2),
+    inset 0 1px 0 color-mix(in oklch, white 6%, transparent);
+}
+
+/* Icon button — ripple on click (CSS-only pulse) */
+.icon-btn { transition: background 140ms, color 140ms, transform 120ms; }
+.icon-btn:active { transform: scale(0.92); }
+
+/* Kanban column header counter — subtle badge */
+.col-badge {
+  background: color-mix(in oklch, var(--accent) 16%, var(--bg-2));
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+}
+
+/* Burndown actual line — glow */
+.burndown-actual { filter: drop-shadow(0 0 6px color-mix(in oklch, var(--accent) 60%, transparent)); }
+
+/* Velocity bars — gradient */
+.velo-bar {
+  background: linear-gradient(180deg,
+    color-mix(in oklch, var(--accent) 90%, transparent) 0%,
+    color-mix(in oklch, var(--accent) 30%, var(--bg-3)) 100%);
+  box-shadow: 0 0 12px -3px var(--accent);
+}
+.velo-bar.dim {
+  background: linear-gradient(180deg, var(--bg-3), var(--bg-2));
+  box-shadow: none;
+}
+
+/* Roadmap bar — gradient fill with progress wipe */
+.roadmap-bar {
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+}
+.roadmap-bar::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    color-mix(in oklch, var(--proj, var(--accent)) 55%, transparent) 0%,
+    color-mix(in oklch, var(--proj, var(--accent)) 18%, transparent) 100%);
+  opacity: 0.9;
+  mix-blend-mode: screen;
+}
+
+/* Gradient divider */
+.grad-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--border-strong) 20%,
+    var(--border-strong) 80%,
+    transparent 100%);
+}
+
+/* Command palette — glassmorphism */
+.palette {
+  background: color-mix(in oklch, var(--bg-elev) 85%, transparent);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border: 1px solid color-mix(in oklch, var(--accent) 20%, var(--border-strong));
+  box-shadow:
+    0 24px 80px -20px oklch(0 0 0 / 0.6),
+    0 0 0 1px color-mix(in oklch, var(--accent) 10%, transparent),
+    inset 0 1px 0 color-mix(in oklch, white 6%, transparent);
+  animation: palette-in 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+@keyframes palette-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.palette-item { transition: background 120ms, color 120ms, transform 100ms; }
+.palette-item.sel {
+  background: linear-gradient(90deg,
+    color-mix(in oklch, var(--accent) 14%, transparent),
+    transparent);
+}
+
+/* Inbox panel — glass */
+.inbox-panel {
+  background: color-mix(in oklch, var(--bg-1) 82%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+/* Tweaks panel — glass */
+.tweaks {
+  background: color-mix(in oklch, var(--bg-elev) 78%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid color-mix(in oklch, var(--accent) 25%, var(--border-strong));
+  box-shadow:
+    0 20px 60px -20px oklch(0 0 0 / 0.5),
+    0 0 0 1px color-mix(in oklch, var(--accent) 10%, transparent);
+}
+
+/* Hint bar — glass */
+.hint-bar {
+  background: color-mix(in oklch, var(--bg-elev) 80%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+/* Row hover — subtle gradient sweep */
+.row { transition: background 160ms; position: relative; }
+.row:hover {
+  background: linear-gradient(90deg,
+    color-mix(in oklch, var(--accent) 6%, transparent) 0%,
+    var(--bg-1) 20%);
+}
+
+/* Avatar stack — gradient bg (override flat) */
+.avatar {
+  transition: transform 140ms;
+}
+.avatar:hover { transform: translateY(-1px) scale(1.06); z-index: 2; }
+
+/* Notification dot pulse */
+.icon-btn .dot {
+  animation: dot-pulse 2.4s ease-in-out infinite;
+  box-shadow: 0 0 8px -1px var(--accent);
+}
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.3); opacity: 0.65; }
+}
+
+/* Gradient progress track */
+.grad-progress {
+  background: linear-gradient(90deg, var(--accent) 0%, color-mix(in oklch, var(--accent) 60%, var(--violet)) 100%);
+  box-shadow: 0 0 10px -3px var(--accent);
+}
+
+/* Subtle scan line on data cards */
+.scan::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -50%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--accent) 8%, transparent), transparent);
+  animation: scan 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes scan {
+  to { left: 150%; }
+}
+
+/* Issue detail hero — spotlight */
+.issue-spotlight {
+  position: relative;
+}
+.issue-spotlight::before {
+  content: "";
+  position: absolute;
+  top: -40px; left: -40px; right: -40px; height: 200px;
+  background: radial-gradient(ellipse 60% 100% at 20% 50%,
+    color-mix(in oklch, var(--accent) 10%, transparent) 0%,
+    transparent 60%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Tag / chip gradient on hover */
+.chip:hover, .tag:hover {
+  border-color: var(--border-strong);
+  background: color-mix(in oklch, var(--bg-3) 100%, transparent);
+}
+
+/* Kanban column boundary glow on drop target sim */
+.kanban-col {
+  position: relative;
+}
+
+/* Make topbar breadcrumb current accent on active */
+.breadcrumbs .current {
+  background: linear-gradient(90deg, var(--fg-0), color-mix(in oklch, var(--accent) 50%, var(--fg-0)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

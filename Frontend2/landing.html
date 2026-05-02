@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian — Donde el trabajo encuentra su ritmo</title>
+  <meta name="description" content="Meridian es el sistema operativo del equipo: issues, sprints, docs y roadmap en una sola pieza." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css" />
+</head>
+<body>
+  <div class="scroll-prog" id="scroll-prog"></div>
+  <div class="bg-field"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-noise"></div>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="particles">
+    <span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- ========= NAV ========= -->
+  <nav class="nav">
+    <a class="brand" href="#">
+      <span class="logo"></span>
+      <span class="name">Meridian</span>
+      <span class="ws">/ aurora</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Producto</a>
+      <a href="#stage">Demo</a>
+      <a href="#pricing">Precio</a>
+      <a href="#faq">FAQ</a>
+      <a href="#" id="changelog-link">Changelog</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn ghost" id="open-login">Log in</button>
+      <button class="btn primary" id="open-signup">Empezar gratis →</button>
+    </div>
+  </nav>
+
+  <!-- ========= HERO ========= -->
+  <section class="section hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="badge-row rv">
+          <span class="eyebrow"><span class="dot"></span>v3.4 — Vector AI triage</span>
+          <span class="eyebrow mono">Y Combinator W24</span>
+        </div>
+        <h1 class="rv">
+          <span class="ww">Donde el</span><br/>
+          <span class="ww">trabajo</span><br/>
+          <span class="ww">encuentra su </span><span class="word-shimmer">ritmo</span><span class="cursor"></span>
+        </h1>
+        <p class="lead rv">
+          Issues, sprints, docs, roadmap y PRs en una sola pieza, hecha a la
+          velocidad del teclado. Sin tabs perdidos. Sin standups eternos.
+        </p>
+        <div class="hero-cta rv">
+          <button class="btn primary lg" id="cta-hero">Empezar gratis</button>
+          <button class="btn lg" id="cta-demo">
+            Ver demo en vivo
+            <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--rose); box-shadow:0 0 8px var(--rose); animation: pulse 1.4s infinite"></span>
+          </button>
+        </div>
+        <div class="hero-meta rv">
+          <span class="d"><span class="ind"></span>14.231 equipos activos</span>
+          <span class="d mono">SOC 2 · ISO 27001</span>
+          <span class="d mono">99.99% uptime</span>
+        </div>
+      </div>
+
+      <!-- Hero "video" -->
+      <div class="hero-video rv" aria-label="Demo en vivo de Meridian">
+        <div class="hv-chrome">
+          <span class="dot" style="background: var(--rose)"></span>
+          <span class="dot" style="background: var(--amber)"></span>
+          <span class="dot" style="background: var(--accent)"></span>
+          <span class="url">meridian.app/aurora/sprint-22</span>
+        </div>
+
+        <div class="hv-stage">
+          <!-- toolbar fake -->
+          <div class="hv-toolbar">
+            <div class="hv-tabs">
+              <span class="on">Board</span>
+              <span>List</span>
+              <span>Timeline</span>
+            </div>
+            <div class="hv-presence">
+              <span class="pa pa-1">JL</span>
+              <span class="pa pa-2">MK</span>
+              <span class="pa pa-3">RT</span>
+              <span class="pn"><span class="pn-d"></span>3 en línea</span>
+            </div>
+          </div>
+
+          <div class="kanban">
+            <div class="kcol todo" data-col="todo">
+              <h5><span class="sd"></span>Backlog<span class="ct">3</span></h5>
+              <div class="kcard"><span class="id">AUR-411</span><span class="title">Onboarding: empty state</span><span class="meta"><span class="av"></span>JL · <span class="tag">design</span></span></div>
+              <div class="kcard"><span class="id">AUR-413</span><span class="title">Sentry tracing webhooks</span><span class="meta"><span class="av" style="background: linear-gradient(135deg, var(--rose), var(--amber))"></span>MK · <span class="tag">infra</span></span></div>
+              <div class="kcard"><span class="id">AUR-419</span><span class="title">Bulk re-prioritize</span><span class="meta"><span class="av" style="background: linear-gradient(135deg, var(--cyan), var(--accent))"></span>SP</span></div>
+            </div>
+            <div class="kcol prog" data-col="prog">
+              <h5><span class="sd"></span>In progress<span class="ct">2</span></h5>
+              <div class="kcard k-target"><span class="id">AUR-412</span><span class="title">Realtime cursors</span><span class="meta"><span class="av"></span>JL · <span class="tag">edit</span></span></div>
+              <div class="kcard"><span class="id">AUR-407</span><span class="title">Vector triage digest</span><span class="meta"><span class="av" style="background: linear-gradient(135deg, var(--rose), var(--amber))"></span>RT · <span class="tag">ml</span></span></div>
+            </div>
+            <div class="kcol done" data-col="done">
+              <h5><span class="sd"></span>Shipped<span class="ct">2</span></h5>
+              <div class="kcard"><span class="id">AUR-401</span><span class="title">Cmd-K fuzzy search</span><span class="meta"><span class="av"></span>RT · <span class="tag">ship</span></span></div>
+              <div class="kcard"><span class="id">AUR-403</span><span class="title">Relative dates</span><span class="meta"><span class="av" style="background: linear-gradient(135deg, var(--cyan), var(--violet))"></span>JL</span></div>
+            </div>
+          </div>
+
+          <!-- single moving card (the "live" demo) -->
+          <div class="kcard moving" id="moving-card">
+            <span class="id">AUR-405</span>
+            <span class="title">Embed Figma en docs</span>
+            <span class="meta"><span class="av" style="background: linear-gradient(135deg, var(--violet), var(--cyan))"></span>julia · <span class="tag">ship</span></span>
+          </div>
+
+          <!-- cursor that "drags" the card -->
+          <div class="cursor-fly">
+            <svg viewBox="0 0 16 16">
+              <path d="M2 2 L13 7 L8 8.5 L7 14 Z" fill="oklch(0.85 0.17 145)" stroke="oklch(0.20 0.05 145)" stroke-width="1"/>
+            </svg>
+            <span class="label">julia</span>
+          </div>
+
+          <!-- bottom live stats -->
+          <div class="hv-stats">
+            <div class="hv-stat"><span class="hv-k">Cycle</span><span class="hv-v">3.2d</span></div>
+            <div class="hv-stat"><span class="hv-k">Burn</span><span class="hv-v hv-bar"><i style="width:64%"></i></span></div>
+            <div class="hv-stat"><span class="hv-k">Build</span><span class="hv-v"><span class="hv-d hv-d-ok"></span>passed · 1m 04s</span></div>
+            <div class="hv-stat"><span class="hv-k">PR</span><span class="hv-v">#882 merged</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= LOGOS ========= -->
+  <section class="logos">
+    <div class="wrap">
+      <div class="label">Construido con equipos en</div>
+      <div class="logos-marquee">
+        <div class="track">
+          <span>◌ ARCWAVE</span>
+          <span>HELIOS·CO</span>
+          <span>FRAME / SHIFT</span>
+          <span>NORTH BUREAU</span>
+          <span>nimbus<sup>×</sup></span>
+          <span>—— ECHO LABS</span>
+          <span>VANGUARD&nbsp;OPS</span>
+          <span>◇ KINETIC</span>
+          <span>POLARIS&nbsp;/CO</span>
+          <span>※ SUBSTRATE</span>
+          <span>◌ ARCWAVE</span>
+          <span>HELIOS·CO</span>
+          <span>FRAME / SHIFT</span>
+          <span>NORTH BUREAU</span>
+          <span>nimbus<sup>×</sup></span>
+          <span>—— ECHO LABS</span>
+          <span>VANGUARD&nbsp;OPS</span>
+          <span>◇ KINETIC</span>
+          <span>POLARIS&nbsp;/CO</span>
+          <span>※ SUBSTRATE</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= STATS STRIP ========= -->
+  <section class="section" style="padding-top:40px; padding-bottom:40px">
+    <div class="wrap">
+      <div class="stats-strip rv">
+        <div class="st">
+          <div class="num"><em data-stat="14231">0</em></div>
+          <div class="lab">Equipos activos</div>
+          <div class="sub">+18% este trimestre</div>
+        </div>
+        <div class="st">
+          <div class="num"><em data-stat="3.2" data-decimals="1">0.0</em><span style="font-size:28px;color:var(--fg-2)">d</span></div>
+          <div class="lab">Cycle time medio</div>
+          <div class="sub">vs 5.7d en herramientas tradicionales</div>
+        </div>
+        <div class="st">
+          <div class="num"><em data-stat="42">0</em><span style="font-size:28px;color:var(--fg-2)">ms</span></div>
+          <div class="lab">Latencia p50</div>
+          <div class="sub">acción → render</div>
+        </div>
+        <div class="st">
+          <div class="num"><em data-stat="99.99" data-decimals="2">0</em><span style="font-size:28px;color:var(--fg-2)">%</span></div>
+          <div class="lab">Uptime SLA</div>
+          <div class="sub">últimos 12 meses</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= FEATURES ========= -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <div class="feature-head rv">
+        <span class="eyebrow"><span class="dot"></span>El producto</span>
+        <h2>Una herramienta. <span class="editorial">Cero fricción.</span></h2>
+        <p>Cada pieza de Meridian está pensada para que el trabajo se mueva sin que tengas que recordarlo.</p>
+      </div>
+
+      <div class="features rv">
+        <!-- Velocity -->
+        <div class="f-card f-wide-3">
+          <div class="label"><span class="n">01</span> · velocidad</div>
+          <h3>Atajos en todo. Mouse opcional.</h3>
+          <p>Cmd-K abre la paleta. C crea issue. G+S va a sprints. Aprendés en una tarde, no lo soltás más.</p>
+          <div class="canvas" style="display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:18px">
+            <span class="kbd" style="font-size:12px;padding:6px 10px">⌘K</span>
+            <span class="kbd" style="font-size:12px;padding:6px 10px">C</span>
+            <span class="kbd" style="font-size:12px;padding:6px 10px">G</span><span style="color:var(--fg-3)">+</span>
+            <span class="kbd" style="font-size:12px;padding:6px 10px">S</span>
+            <span class="kbd" style="font-size:12px;padding:6px 10px">⌘ ↵</span>
+            <span class="kbd" style="font-size:12px;padding:6px 10px">/</span>
+            <span class="kbd" style="font-size:12px;padding:6px 10px">⇧?</span>
+            <div style="flex-basis: 100%; height: 0"></div>
+            <div class="term" style="background:var(--bg-1);border:1px solid var(--border);border-radius:8px;padding:10px 12px;width:100%;max-width:340px;margin-top:10px">
+              <div class="l mono"><span class="pr">›</span> &nbsp;assign aur-412 julia<span class="blink"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI triage -->
+        <div class="f-card f-wide-3">
+          <div class="label"><span class="n">02</span> · vector ai</div>
+          <h3>Triage automático con embeddings.</h3>
+          <p>Tu inbox se ordena solo: duplicados, prioridad, owner sugerido. Vos solo confirmás.</p>
+          <div class="canvas">
+            <div class="ai-stream">
+              <div class="ai-row">
+                <span class="av"></span>
+                <span class="t">"Login no funciona en Safari iOS 17"</span>
+                <span class="tag">→ AUR-402 dup</span>
+              </div>
+              <div class="ai-row r2">
+                <span class="av" style="background:linear-gradient(135deg,var(--rose),var(--amber))"></span>
+                <span class="t">"Notif push se pierden"</span>
+                <span class="tag">→ infra · alta</span>
+              </div>
+              <div class="ai-row r3">
+                <span class="av" style="background:linear-gradient(135deg,var(--cyan),var(--violet))"></span>
+                <span class="t">"¿Cómo invito a un externo?"</span>
+                <span class="tag">→ docs/sharing</span>
+              </div>
+              <div class="ai-row r4">
+                <span class="av"></span>
+                <span class="t">"Roadmap de Q2 disponible?"</span>
+                <span class="tag">→ raúl</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Realtime collab -->
+        <div class="f-card f-wide-2">
+          <div class="label"><span class="n">03</span> · colaboración</div>
+          <h3>Realtime, sin guardar.</h3>
+          <p>Los cursores, las decisiones y los cambios se mueven con el equipo.</p>
+          <div class="canvas">
+            <div class="orbit">
+              <div class="ring r1"></div>
+              <div class="ring r2"></div>
+              <div class="ring r3"></div>
+              <div class="core"></div>
+              <div class="av a1">JL</div>
+              <div class="av a2">MK</div>
+              <div class="av a3">RT</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Velocity counter -->
+        <div class="f-card f-wide-2">
+          <div class="label"><span class="n">04</span> · números</div>
+          <h3>Velocidad medida.</h3>
+          <p>Cycle time, throughput y burn — actualizados en vivo.</p>
+          <div class="canvas">
+            <div class="counter-canvas">
+              <div class="num"><em data-count="3.2">0.0</em>d</div>
+              <div class="lab">cycle time medio</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roadmap -->
+        <div class="f-card f-wide-2">
+          <div class="label"><span class="n">05</span> · roadmap</div>
+          <h3>Trimestres, no fantasía.</h3>
+          <p>Iniciativas con dependencias y riesgo, en una sola línea.</p>
+          <div class="canvas">
+            <div class="tl">
+              <div class="row"><span class="lab">Auth v2</span><div class="bar b1"><div class="fill"></div></div></div>
+              <div class="row"><span class="lab">Vector AI</span><div class="bar b2"><div class="fill"></div></div></div>
+              <div class="row"><span class="lab">Docs sync</span><div class="bar b3"><div class="fill"></div></div></div>
+              <div class="row"><span class="lab">SAML SSO</span><div class="bar b4"><div class="fill"></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Velocity full -->
+        <div class="f-card f-wide-3">
+          <div class="label"><span class="n">06</span> · análisis</div>
+          <h3>Tendencia que se entiende sin gráfico.</h3>
+          <p>Burndown semanal con anotaciones, no dashboards huérfanos.</p>
+          <div class="canvas">
+            <svg class="spark-svg" viewBox="0 0 600 160" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="g-area" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="oklch(0.85 0.17 145)" stop-opacity="0.45"/>
+                  <stop offset="100%" stop-color="oklch(0.85 0.17 145)" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path class="area" d="M0,140 L0,110 C 60,100 90,60 150,70 S 240,120 300,90 S 420,40 480,55 S 580,30 600,20 L600,160 L0,160 Z"/>
+              <path class="ln"   d="M0,110 C 60,100 90,60 150,70 S 240,120 300,90 S 420,40 480,55 S 580,30 600,20"/>
+              <circle class="pt" cx="600" cy="20" r="4"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="f-card f-wide-3">
+          <div class="label"><span class="n">07</span> · docs</div>
+          <h3>Notion para humans, Markdown para máquinas.</h3>
+          <p>Documentos que viven al lado del código, con embeds y backlinks de issues.</p>
+          <div class="canvas" style="padding:14px;font-family:var(--font-editorial);font-style:italic;font-size:24px;line-height:1.3;letter-spacing:-0.02em;color:var(--fg-1)">
+            "El feedback negativo se dispara cuando el cycle time supera 4 días"
+            <div style="font-family:var(--font-mono);font-style:normal;font-size:10.5px;color:var(--fg-3);text-transform:uppercase;letter-spacing:0.12em;margin-top:14px">— retro · sprint 21</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= STAGE (interactive demo) ========= -->
+  <section class="section stage-section" id="stage">
+    <div class="wrap">
+      <div class="feature-head rv">
+        <span class="eyebrow"><span class="dot"></span>Tour interactivo</span>
+        <h2>Mirá Meridian <span class="editorial">por dentro</span>.</h2>
+        <p>Cambiá de vista. Como en la app real.</p>
+      </div>
+
+      <div class="stage-shell rv">
+        <div class="stage-tabs" role="tablist">
+          <button data-tab="kanban" class="on">Sprint board</button>
+          <button data-tab="gantt">Roadmap</button>
+          <button data-tab="docs">Docs</button>
+        </div>
+        <div class="stage-content">
+          <!-- Kanban pane -->
+          <div class="stage-pane on" data-pane="kanban">
+            <div class="bk">
+              <div class="bk-col" data-col="backlog">
+                <h5>Backlog <span class="ct">12</span></h5>
+                <div class="drop-zone"></div>
+                <div class="bk-card" data-id="AUR-419"><span class="id">AUR-419</span><span class="t">Bulk re-prioritize</span><span class="ft"><span class="pri" style="background:var(--fg-3)"></span>P3 · SP</span></div>
+                <div class="bk-card" data-id="AUR-422"><span class="id">AUR-422</span><span class="t">CSV export en issues</span><span class="ft"><span class="pri" style="background:var(--amber)"></span>P2 · MK</span></div>
+                <div class="bk-card" data-id="AUR-424"><span class="id">AUR-424</span><span class="t">Filtro por label combinado</span><span class="ft"><span class="pri" style="background:var(--fg-3)"></span>P3 · —</span></div>
+              </div>
+              <div class="bk-col" data-col="todo">
+                <h5>Todo <span class="ct">7</span></h5>
+                <div class="drop-zone"></div>
+                <div class="bk-card" data-id="AUR-409"><span class="id">AUR-409</span><span class="t">Auth: rotación de tokens</span><span class="ft"><span class="pri" style="background:var(--rose)"></span>P0 · NM</span></div>
+                <div class="bk-card" data-id="AUR-410"><span class="id">AUR-410</span><span class="t">Sprint board: keyboard reorder</span><span class="ft"><span class="pri" style="background:var(--amber)"></span>P2 · EH</span></div>
+                <div class="bk-card" data-id="AUR-411"><span class="id">AUR-411</span><span class="t">Empty state en proyecto nuevo</span><span class="ft"><span class="pri" style="background:var(--fg-3)"></span>P3 · JL</span></div>
+              </div>
+              <div class="bk-col" data-col="progress">
+                <h5>In progress <span class="ct">4</span></h5>
+                <div class="drop-zone"></div>
+                <div class="bk-card" data-id="AUR-407"><span class="id">AUR-407</span><span class="t">Vector triage: digest semanal</span><span class="ft"><span class="pri" style="background:var(--rose)"></span>P0 · RT</span></div>
+                <div class="bk-card" data-id="AUR-408"><span class="id">AUR-408</span><span class="t">A11y: drag handle del board</span><span class="ft"><span class="pri" style="background:var(--amber)"></span>P2 · EH</span></div>
+              </div>
+              <div class="bk-col" data-col="shipped">
+                <h5>Shipped <span class="ct">23</span></h5>
+                <div class="drop-zone"></div>
+                <div class="bk-card" data-id="AUR-401"><span class="id">AUR-401</span><span class="t">Cmd-K · fuzzy en body</span><span class="ft"><span class="pri" style="background:var(--accent)"></span>done · RT</span></div>
+                <div class="bk-card" data-id="AUR-403"><span class="id">AUR-403</span><span class="t">Fechas relativas en todo</span><span class="ft"><span class="pri" style="background:var(--accent)"></span>done · JL</span></div>
+                <div class="bk-card" data-id="AUR-405"><span class="id">AUR-405</span><span class="t">Embed de Figma en docs</span><span class="ft"><span class="pri" style="background:var(--accent)"></span>done · MK</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gantt pane -->
+          <div class="stage-pane" data-pane="gantt">
+            <div class="gantt">
+              <div class="head">
+                <span>Iniciativa</span>
+                <div class="weeks">
+                  <span>W23</span><span>W24</span><span>W25</span><span>W26</span><span>W27</span><span>W28</span><span>W29</span><span>W30</span>
+                </div>
+              </div>
+              <div class="grow">
+                <div class="g-row">
+                  <span class="nm"><span class="d" style="background:var(--accent)"></span>Auth v2 · rotación</span>
+                  <div class="gtrack"><div class="b" style="left:5%;width:30%;background:var(--accent)"></div></div>
+                </div>
+                <div class="g-row">
+                  <span class="nm"><span class="d" style="background:var(--violet)"></span>Vector AI · embeddings</span>
+                  <div class="gtrack"><div class="b" style="left:18%;width:42%;background:var(--violet)"></div></div>
+                </div>
+                <div class="g-row">
+                  <span class="nm"><span class="d" style="background:var(--amber)"></span>Docs sync (Notion-like)</span>
+                  <div class="gtrack"><div class="b" style="left:30%;width:38%;background:var(--amber)"></div></div>
+                </div>
+                <div class="g-row">
+                  <span class="nm"><span class="d" style="background:var(--cyan)"></span>SAML / SSO Enterprise</span>
+                  <div class="gtrack"><div class="b" style="left:55%;width:28%;background:var(--cyan)"></div></div>
+                </div>
+                <div class="g-row">
+                  <span class="nm"><span class="d" style="background:var(--rose)"></span>Mobile · PWA offline</span>
+                  <div class="gtrack"><div class="b" style="left:65%;width:30%;background:var(--rose)"></div></div>
+                </div>
+                <div class="g-row">
+                  <span class="nm"><span class="d" style="background:var(--fg-2)"></span>API v2 público</span>
+                  <div class="gtrack"><div class="b" style="left:80%;width:18%;background:var(--fg-2)"></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Docs pane -->
+          <div class="stage-pane" data-pane="docs">
+            <div class="docs-pane">
+              <div class="docs-side">
+                <div class="gr">Aurora</div>
+                <div class="item"><svg class="di" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Plan trimestral</div>
+                <div class="item on"><svg class="di" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Retro sprint 21</div>
+                <div class="item"><svg class="di" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Decisión: vector store</div>
+                <div class="gr">Engineering</div>
+                <div class="item"><svg class="di" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Postmortem · cache</div>
+                <div class="item"><svg class="di" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>RFC · auth rotation</div>
+              </div>
+              <div class="docs-body">
+                <div class="meta">retro · sprint 21 · 4 jun</div>
+                <h3>Lo que aprendimos del último ciclo</h3>
+                <p>Cerramos sprint 21 con un <span class="hl">cycle time de 3.2 días</span> — una mejora de 18% sobre el anterior. La hipótesis: el triage automático con vector AI nos sacó la fricción del lunes.</p>
+                <p>El feedback negativo se dispara cuando el cycle time supera 4 días. Mantenerlo abajo de eso es probablemente el indicador más correlacionado con NPS interno.</p>
+                <div class="embed">
+                  <span class="iv">📊</span>
+                  <div>
+                    <div style="font-weight:500;color:var(--fg-0)">Burndown · Sprint 21</div>
+                    <div style="font-size:11px;color:var(--fg-3);font-family:var(--font-mono);margin-top:2px">embed · meridian/charts</div>
+                  </div>
+                </div>
+                <p>Próximo paso: medir si el digest semanal del viernes mantiene la inercia o la rompe en transición de fin de semana.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= QUOTE ========= -->
+  <section class="quote-section">
+    <div class="wrap">
+      <p class="quote rv">
+        "Probamos cinco herramientas en seis meses. Meridian fue la primera que el equipo
+        <span style="color:var(--accent);font-style:normal;font-weight:500">no quiso reemplazar</span>.
+        Las cosas se mueven."
+        <span class="who">
+          <span class="av"></span>
+          Lucía Bermúdez · Head of Eng, Helios·co
+        </span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ========= PRICING ========= -->
+  <section class="section" id="pricing">
+    <div class="wrap">
+      <div class="pricing-head rv">
+        <span class="eyebrow"><span class="dot"></span>Precio</span>
+        <h2>Pagás por lo que usás. <span class="editorial">Nada más.</span></h2>
+        <p>Empezá gratis. Crecé sin sorpresas. Cancelá con un click.</p>
+        <div class="bill-toggle" id="bill-toggle" role="tablist">
+          <span class="pill" id="bill-pill"></span>
+          <button class="on" data-bill="month">Mensual</button>
+          <button data-bill="year">Anual <span class="save">-20%</span></button>
+        </div>
+      </div>
+
+      <div class="tiers rv">
+        <!-- Free -->
+        <div class="tier">
+          <div>
+            <h3>Solo</h3>
+            <div class="desc">Para una persona o un side project.</div>
+          </div>
+          <div class="price-row">
+            <span class="price">$0</span>
+            <span class="per">por usuario / mes</span>
+          </div>
+          <div class="feats">
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>1 workspace · hasta 3 usuarios</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Issues, sprints y docs ilimitados</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Cmd-K, atajos, shortcuts</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>API y CLI básicos</div>
+          </div>
+          <button class="btn login-trigger">Empezar gratis</button>
+        </div>
+
+        <!-- Team featured -->
+        <div class="tier featured">
+          <span class="badge">popular</span>
+          <div>
+            <h3>Team</h3>
+            <div class="desc">Para equipos que envían cosas todas las semanas.</div>
+          </div>
+          <div class="price-row">
+            <span class="price" data-month="$12" data-year="$10">$12</span>
+            <span class="per">por usuario / mes</span>
+          </div>
+          <div class="feats">
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Workspaces ilimitados</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Vector AI triage incluido</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Roadmap, métricas y burndown</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>GitHub, Slack, Linear sync</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Soporte priority — &lt; 4h</div>
+          </div>
+          <button class="btn primary login-trigger">Probar 14 días gratis</button>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="tier">
+          <div>
+            <h3>Enterprise</h3>
+            <div class="desc">Para organizaciones con cumplimiento serio.</div>
+          </div>
+          <div class="price-row">
+            <span class="price" style="font-size:38px">A medida</span>
+          </div>
+          <div class="feats">
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>SSO/SAML, SCIM, audit log</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>SOC 2 type II, ISO 27001</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Despliegue en tu nube (BYOC)</div>
+            <div class="feat"><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>SLA 99.99% · soporte dedicado</div>
+          </div>
+          <button class="btn">Hablar con ventas</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= FAQ ========= -->
+  <section class="section" id="faq">
+    <div class="wrap">
+      <div class="feature-head rv">
+        <span class="eyebrow"><span class="dot"></span>FAQ</span>
+        <h2>Preguntas <span class="editorial">razonables</span>.</h2>
+      </div>
+      <div class="faq rv">
+        <div class="faq-item open">
+          <button class="faq-q">¿Puedo migrar desde Linear, Jira o Notion? <span class="pl">+</span></button>
+          <div class="faq-a"><p>Sí. Tenemos importadores con un click para Linear y Jira (issues, comentarios, attachments, sprints). Para Notion importamos páginas como docs, conservando la jerarquía.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">¿Cómo se cobran los usuarios invitados? <span class="pl">+</span></button>
+          <div class="faq-a"><p>Los guests con permiso de solo-comentario son gratis. Solo cobramos por usuarios con acceso de edición a issues o docs.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">¿Mis datos son míos? <span class="pl">+</span></button>
+          <div class="faq-a"><p>Siempre. Exportás todo en JSON o Markdown desde Settings → Data. No usamos tus issues para entrenar modelos. Punto.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">¿Funciona offline? <span class="pl">+</span></button>
+          <div class="faq-a"><p>El web app cachea tus últimos 30 días localmente. La PWA mobile (Q3) lo hace nativo, con sync al volver online.</p></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">¿Hay descuento para startups/educación/OSS? <span class="pl">+</span></button>
+          <div class="faq-a"><p>Sí, tres programas: Startups (50% por 1 año si tenés &lt; $5M raised), educación (gratis para .edu) y OSS (gratis para repos públicos verificados).</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= CTA ========= -->
+  <section class="cta-section">
+    <div class="cta-card rv">
+      <span class="eyebrow"><span class="dot"></span>Empezar</span>
+      <h2>El trabajo no se hace solo.<br/><span class="editorial">Pero casi.</span></h2>
+      <p class="lead">14 días gratis en Team. Sin tarjeta. 90 segundos de setup.</p>
+      <div class="row">
+        <button class="btn primary lg login-trigger">Empezar gratis →</button>
+        <button class="btn lg" id="cta-demo-2">Ver demo en vivo</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= FOOTER ========= -->
+  <footer class="foot">
+    <div class="foot-grid">
+      <div>
+        <a class="brand" href="#" style="margin-bottom:14px">
+          <span class="logo"></span>
+          <span class="name">Meridian</span>
+        </a>
+        <p style="color:var(--fg-2);font-size:13px;max-width:36ch;margin:14px 0 0">El sistema operativo del equipo.<br/>Hecho en Buenos Aires, San Francisco y Lisboa.</p>
+      </div>
+      <div>
+        <h5>Producto</h5>
+        <ul>
+          <li><a href="#features">Funcionalidades</a></li>
+          <li><a href="#pricing">Precio</a></li>
+          <li><a href="#">Integraciones</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Empresa</h5>
+        <ul>
+          <li><a href="#">Sobre nosotros</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Trabajos</a></li>
+          <li><a href="#">Prensa</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Términos</a></li>
+          <li><a href="#">Seguridad</a></li>
+          <li><a href="#">Status</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bot">
+      <span class="mono">© 2026 Meridian Software, Inc.</span>
+      <span class="mono">v3.4.2 · BUE / SFO / LIS</span>
+    </div>
+  </footer>
+
+  <!-- ========= LOGIN MODAL ========= -->
+  <div class="lg-overlay" id="login-overlay" role="dialog" aria-modal="true" aria-labelledby="lg-title">
+    <div class="lg-modal">
+      <button class="lg-x" id="lg-close" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <h3 id="lg-title">Bienvenido de vuelta</h3>
+      <p class="sub">Ingresá a tu workspace.</p>
+
+      <form id="lg-form">
+        <div class="lg-field">
+          <label>Email de trabajo</label>
+          <input type="email" placeholder="vos@equipo.com" autocomplete="email" />
+        </div>
+        <div class="lg-field">
+          <label>Contraseña</label>
+          <input type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <div class="lg-row">
+          <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" /> Recordar 30 días</label>
+          <a href="#">¿Olvidaste?</a>
+        </div>
+        <button type="submit" class="btn primary" style="width:100%;justify-content:center">Entrar a Meridian →</button>
+      </form>
+
+      <div class="lg-divider">o continuar con</div>
+      <div class="lg-sso">
+        <button class="btn login-sso">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M21.35 11.1H12v3.9h5.35c-.5 2.5-2.6 4.3-5.35 4.3-3.25 0-5.9-2.65-5.9-5.9s2.65-5.9 5.9-5.9c1.6 0 3 .65 4 1.55l2.75-2.75C16.95 4.7 14.65 3.7 12 3.7 6.85 3.7 2.7 7.85 2.7 13s4.15 9.3 9.3 9.3c5.35 0 8.9-3.75 8.9-9.05 0-.6-.05-1.15-.15-1.65z"/></svg>
+          Continuar con Google
+        </button>
+        <button class="btn login-sso">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 .3c-6.6 0-12 5.4-12 12 0 5.3 3.4 9.8 8.2 11.4.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.3-3.2-.1-.3-.6-1.6.1-3.4 0 0 1-.3 3.4 1.2 1-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.6 3.4-1.2 3.4-1.2.7 1.7.2 3 .1 3.4.8.9 1.3 2 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.7-1.6 8.1-6.1 8.1-11.4 0-6.6-5.4-12-12-12z"/></svg>
+          Continuar con GitHub
+        </button>
+        <button class="btn login-sso">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 8l9 6 9-6"/></svg>
+          SSO / SAML
+        </button>
+      </div>
+      <div class="lg-foot">¿Sin cuenta? <a href="#" id="lg-signup">Crear workspace</a></div>
+    </div>
+  </div>
+
+  <script>
+    // === Spotlight follow ===
+    const spot = document.getElementById('spotlight');
+    document.addEventListener('mousemove', (e) => {
+      spot.style.left = e.clientX + 'px';
+      spot.style.top = e.clientY + 'px';
+    });
+
+    // === Scroll progress ===
+    const prog = document.getElementById('scroll-prog');
+    window.addEventListener('scroll', () => {
+      const h = document.documentElement;
+      const sc = h.scrollTop / (h.scrollHeight - h.clientHeight);
+      prog.style.width = (sc * 100) + '%';
+    });
+
+    // === Stats counters ===
+    const statObs = new IntersectionObserver((es) => {
+      es.forEach(e => {
+        if (!e.isIntersecting) return;
+        const el = e.target;
+        const target = parseFloat(el.dataset.stat);
+        const dec = parseInt(el.dataset.decimals || '0');
+        const dur = 1400; const t0 = performance.now();
+        const tick = (t) => {
+          const p = Math.min(1, (t - t0) / dur);
+          const ease = 1 - Math.pow(1 - p, 3);
+          const v = target * ease;
+          el.textContent = dec ? v.toFixed(dec) : Math.round(v).toLocaleString('es-AR');
+          if (p < 1) requestAnimationFrame(tick);
+          else el.textContent = dec ? target.toFixed(dec) : target.toLocaleString('es-AR');
+        };
+        requestAnimationFrame(tick);
+        statObs.unobserve(el);
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll('em[data-stat]').forEach(el => statObs.observe(el));
+
+    // === Magnetic buttons ===
+    document.querySelectorAll('.btn.primary').forEach(b => {
+      b.addEventListener('mousemove', (e) => {
+        const r = b.getBoundingClientRect();
+        const x = e.clientX - r.left - r.width/2;
+        const y = e.clientY - r.top - r.height/2;
+        b.style.transform = `translate(${x*0.15}px, ${y*0.20}px)`;
+      });
+      b.addEventListener('mouseleave', () => { b.style.transform = ''; });
+    });
+
+    // === Hero h1 letter rise ===
+    document.querySelectorAll('.hero h1 .ww').forEach((wrap, wi) => {
+      const txt = wrap.textContent;
+      wrap.textContent = '';
+      [...txt].forEach((ch, i) => {
+        const s = document.createElement('span');
+        s.textContent = ch === ' ' ? '\u00A0' : ch;
+        s.style.animationDelay = (wi * 200 + i * 30) + 'ms';
+        wrap.appendChild(s);
+      });
+    });
+
+    // === Kanban live drag animation — cycles across all columns ===
+    (function kanbanLive() {
+      const stage = document.querySelector('.hv-stage');
+      const moving = document.getElementById('moving-card');
+      const cursor = document.querySelector('.cursor-fly');
+      const cols = [...document.querySelectorAll('.kcol')]; // [backlog, prog, shipped]
+      if (!stage || !moving || !cursor || !cols.length) return;
+
+      const counts = cols.map(c => c.querySelector('.ct'));
+      const titleEl = moving.querySelector('.title');
+      const idEl = moving.querySelector('.id');
+      const tagEl = moving.querySelector('.tag');
+
+      // Card identities to rotate (id, title, tag, priority color)
+      const items = [
+        { id: 'AUR-405', title: 'Embed Figma en docs',     tag: 'docs',  pri: 'var(--accent)' },
+        { id: 'AUR-412', title: 'Realtime cursors',        tag: 'edit',  pri: 'var(--violet)' },
+        { id: 'AUR-407', title: 'Vector triage digest',    tag: 'ml',    pri: 'var(--rose)'   },
+        { id: 'AUR-419', title: 'Bulk re-prioritize',      tag: 'ux',    pri: 'var(--amber)'  },
+        { id: 'AUR-413', title: 'Sentry tracing webhooks', tag: 'infra', pri: 'var(--cyan)'   },
+      ];
+
+      const placeOver = (el) => {
+        const sr = stage.getBoundingClientRect();
+        const tr = el.getBoundingClientRect();
+        return { x: tr.left - sr.left, y: tr.top - sr.top };
+      };
+      const colSlotPos = (col) => {
+        // position above first real card in col
+        const sr = stage.getBoundingClientRect();
+        const cr = col.getBoundingClientRect();
+        const firstCard = col.querySelector('.kcard');
+        if (firstCard) {
+          const fr = firstCard.getBoundingClientRect();
+          return { x: fr.left - sr.left, y: fr.top - sr.top };
+        }
+        return { x: cr.left - sr.left + 12, y: cr.top - sr.top + 40 };
+      };
+      const moveTo = (x, y) => {
+        moving.style.left = x + 'px';
+        moving.style.top = y + 'px';
+        cursor.style.left = (x + moving.offsetWidth - 16) + 'px';
+        cursor.style.top = (y + 14) + 'px';
+      };
+      const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+      function setMovingContent(item) {
+        idEl.textContent = item.id;
+        titleEl.textContent = item.title;
+        if (tagEl) tagEl.textContent = item.tag;
+      }
+
+      // Track count per col (start matching DOM)
+      const colCounts = counts.map(c => parseInt(c.textContent, 10) || 0);
+      const updateCounts = () => counts.forEach((c, i) => c.textContent = colCounts[i]);
+
+      let fromIdx = 1; // start: In progress
+      let itemIdx = 0;
+
+      async function loop() {
+        await wait(700);
+        while (true) {
+          const item = items[itemIdx % items.length];
+          setMovingContent(item);
+          // pick next column (different from current)
+          let toIdx;
+          do { toIdx = Math.floor(Math.random() * cols.length); } while (toIdx === fromIdx);
+
+          const fromCol = cols[fromIdx];
+          const toCol = cols[toIdx];
+
+          // 1) appear over a card in fromCol (use first card as anchor)
+          const anchor = fromCol.querySelector('.kcard') || fromCol;
+          const start = placeOver(anchor);
+          moveTo(start.x, start.y);
+          moving.classList.add('is-visible');
+          cursor.classList.add('is-visible');
+          await wait(420);
+
+          // 2) grab/lift
+          moving.classList.add('is-grabbed');
+          await wait(280);
+
+          // decrement source
+          colCounts[fromIdx] = Math.max(0, colCounts[fromIdx] - 1);
+          updateCounts();
+
+          // 3) drag to target col
+          toCol.classList.add('is-target');
+          const dest = colSlotPos(toCol);
+          moveTo(dest.x, dest.y);
+          await wait(950);
+
+          // 4) drop
+          moving.classList.remove('is-grabbed');
+          colCounts[toIdx] += 1;
+          updateCounts();
+          await wait(380);
+
+          // 5) fade out
+          moving.classList.remove('is-visible');
+          cursor.classList.remove('is-visible');
+          toCol.classList.remove('is-target');
+          await wait(900);
+
+          fromIdx = toIdx;
+          itemIdx++;
+        }
+      }
+      loop();
+    })();
+
+    // === Reveal on scroll ===
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+    // === Stage tabs ===
+    const tabs = document.querySelectorAll('.stage-tabs button');
+    const panes = document.querySelectorAll('.stage-pane');
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.remove('on'));
+      panes.forEach(x => x.classList.remove('on'));
+      t.classList.add('on');
+      document.querySelector(`.stage-pane[data-pane="${t.dataset.tab}"]`).classList.add('on');
+    }));
+
+    // Auto-rotate tabs (disabled — let user drive it)
+    // let tabIdx = 0;
+    // setInterval(() => { tabIdx = (tabIdx + 1) % tabs.length; tabs[tabIdx].click(); }, 6000);
+
+    // === Demo: interactive drag + auto-shuffle ===
+    (function demoBoard() {
+      const board = document.querySelector('.stage-pane[data-pane="kanban"] .bk');
+      if (!board) return;
+      const cols = board.querySelectorAll('.bk-col');
+      let dragging = null, ghost = null, offsetX = 0, offsetY = 0;
+      let userActive = false, lastUser = 0;
+
+      function updateCounts() {
+        cols.forEach(c => {
+          const ct = c.querySelector('h5 .ct');
+          const n = c.querySelectorAll('.bk-card').length;
+          if (ct) ct.textContent = n;
+        });
+      }
+
+      function getCol(el) {
+        while (el && !el.classList?.contains('bk-col')) el = el.parentElement;
+        return el;
+      }
+
+      function clearTargets() {
+        cols.forEach(c => c.classList.remove('is-drop-target'));
+      }
+
+      function startDrag(card, ev) {
+        const rect = card.getBoundingClientRect();
+        offsetX = ev.clientX - rect.left;
+        offsetY = ev.clientY - rect.top;
+        dragging = card;
+        userActive = true;
+        lastUser = Date.now();
+
+        // create floating ghost
+        ghost = card.cloneNode(true);
+        ghost.classList.add('is-floating', 'is-dragging');
+        ghost.style.width = rect.width + 'px';
+        ghost.style.left = rect.left + 'px';
+        ghost.style.top = rect.top + 'px';
+        document.body.appendChild(ghost);
+
+        card.style.opacity = '0.25';
+        document.body.style.cursor = 'grabbing';
+        ev.preventDefault();
+      }
+
+      function moveDrag(ev) {
+        if (!ghost) return;
+        ghost.style.left = (ev.clientX - offsetX) + 'px';
+        ghost.style.top = (ev.clientY - offsetY) + 'px';
+
+        // detect column under cursor
+        clearTargets();
+        const elUnder = document.elementFromPoint(ev.clientX, ev.clientY);
+        const col = getCol(elUnder);
+        if (col && board.contains(col)) col.classList.add('is-drop-target');
+      }
+
+      function endDrag(ev) {
+        if (!ghost || !dragging) return;
+        const elUnder = document.elementFromPoint(ev.clientX, ev.clientY);
+        const targetCol = getCol(elUnder);
+        const card = dragging;
+
+        if (targetCol && board.contains(targetCol) && targetCol !== card.parentElement) {
+          targetCol.appendChild(card);
+          card.classList.add('just-landed');
+          setTimeout(() => card.classList.remove('just-landed'), 600);
+        }
+        card.style.opacity = '';
+        ghost.remove();
+        ghost = null;
+        dragging = null;
+        document.body.style.cursor = '';
+        clearTargets();
+        updateCounts();
+      }
+
+      board.addEventListener('mousedown', (ev) => {
+        const card = ev.target.closest('.bk-card');
+        if (!card || !board.contains(card)) return;
+        startDrag(card, ev);
+      });
+      window.addEventListener('mousemove', moveDrag);
+      window.addEventListener('mouseup', endDrag);
+
+      // touch support
+      board.addEventListener('touchstart', (ev) => {
+        const card = ev.target.closest('.bk-card');
+        if (!card) return;
+        const t = ev.touches[0];
+        startDrag(card, { clientX: t.clientX, clientY: t.clientY, preventDefault: () => ev.preventDefault() });
+      }, { passive: false });
+      window.addEventListener('touchmove', (ev) => {
+        if (!ghost) return;
+        const t = ev.touches[0];
+        moveDrag({ clientX: t.clientX, clientY: t.clientY });
+        ev.preventDefault();
+      }, { passive: false });
+      window.addEventListener('touchend', (ev) => {
+        if (!ghost) return;
+        const t = ev.changedTouches[0];
+        endDrag({ clientX: t.clientX, clientY: t.clientY });
+      });
+
+      // === Auto-shuffle: pick a random card, FLIP-animate to a different col ===
+      function autoMove() {
+        if (Date.now() - lastUser < 8000) return; // pause if user just played
+        if (dragging) return;
+
+        const allCards = [...board.querySelectorAll('.bk-card')];
+        if (!allCards.length) return;
+        const card = allCards[Math.floor(Math.random() * allCards.length)];
+        const fromCol = card.parentElement;
+        const otherCols = [...cols].filter(c => c !== fromCol);
+        const toCol = otherCols[Math.floor(Math.random() * otherCols.length)];
+
+        // FLIP: capture from
+        const r1 = card.getBoundingClientRect();
+        toCol.classList.add('is-drop-target');
+        toCol.appendChild(card);
+        // capture to
+        const r2 = card.getBoundingClientRect();
+        const dx = r1.left - r2.left;
+        const dy = r1.top - r2.top;
+        // animate
+        card.style.transition = 'none';
+        card.style.transform = `translate(${dx}px, ${dy}px) rotate(-1deg) scale(1.04)`;
+        card.style.boxShadow = '0 12px 30px rgba(0,0,0,.4)';
+        card.style.zIndex = '10';
+        requestAnimationFrame(() => {
+          card.style.transition = 'transform .65s cubic-bezier(.2,.8,.2,1), box-shadow .65s';
+          card.style.transform = '';
+          card.style.boxShadow = '';
+        });
+        setTimeout(() => {
+          card.style.zIndex = '';
+          card.style.transition = '';
+          toCol.classList.remove('is-drop-target');
+          card.classList.add('just-landed');
+          setTimeout(() => card.classList.remove('just-landed'), 600);
+          updateCounts();
+        }, 700);
+      }
+      setInterval(autoMove, 3500);
+
+      // pause auto on hover
+      board.addEventListener('mouseenter', () => { lastUser = Date.now(); });
+    })();
+
+    // === Billing toggle ===
+    const billBtns = document.querySelectorAll('#bill-toggle button');
+    const pill = document.getElementById('bill-pill');
+    function setPill(btn) {
+      const r = btn.getBoundingClientRect();
+      const pr = btn.parentElement.getBoundingClientRect();
+      pill.style.width = r.width + 'px';
+      pill.style.transform = `translateX(${r.left - pr.left - 4}px)`;
+    }
+    requestAnimationFrame(() => setPill(document.querySelector('#bill-toggle button.on')));
+    window.addEventListener('resize', () => setPill(document.querySelector('#bill-toggle button.on')));
+    billBtns.forEach(b => b.addEventListener('click', () => {
+      billBtns.forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      setPill(b);
+      const mode = b.dataset.bill;
+      document.querySelectorAll('.tier .price[data-month]').forEach(p => {
+        p.textContent = mode === 'year' ? p.dataset.year : p.dataset.month;
+      });
+    }));
+
+    // === FAQ ===
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.querySelector('.faq-q').addEventListener('click', () => {
+        item.classList.toggle('open');
+      });
+    });
+
+    // === Counter ===
+    const ce = document.querySelector('.counter-canvas .num em');
+    if (ce) {
+      const target = parseFloat(ce.dataset.count);
+      const co = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            let v = 0;
+            const step = () => {
+              v += target / 50;
+              if (v >= target) { ce.textContent = target.toFixed(1); return; }
+              ce.textContent = v.toFixed(1);
+              requestAnimationFrame(step);
+            };
+            step();
+            co.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.4 });
+      co.observe(ce);
+    }
+
+    // === Login modal ===
+    const overlay = document.getElementById('login-overlay');
+    const openLogin = () => overlay.classList.add('open');
+    const closeLogin = () => overlay.classList.remove('open');
+
+    document.getElementById('open-login').addEventListener('click', openLogin);
+    document.getElementById('open-signup').addEventListener('click', openLogin);
+    document.getElementById('cta-hero').addEventListener('click', openLogin);
+    document.getElementById('cta-demo').addEventListener('click', () => {
+      document.getElementById('stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.getElementById('cta-demo-2').addEventListener('click', () => {
+      document.getElementById('stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    document.querySelectorAll('.login-trigger').forEach(b => b.addEventListener('click', openLogin));
+    document.getElementById('lg-close').addEventListener('click', closeLogin);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLogin(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLogin(); });
+
+    // Submit + SSO → Meridian.html (auth integration)
+    async function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.querySelector('#lg-form button[type=submit]');
+      const emailInput = document.querySelector('#lg-form input[type=email]');
+      const passwordInput = document.querySelector('#lg-form input[type=password]');
+      
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      
+      if (!email || !password) {
+        alert('Por favor, ingresá tu email y contraseña.');
+        return;
+      }
+      
+      if (btn) { btn.textContent = 'Entrando…'; btn.style.pointerEvents = 'none'; }
+      
+      try {
+        const params = new URLSearchParams();
+        params.append('username', email);
+        params.append('password', password);
+        
+        const response = await fetch('https://banking-rag-auth-api.azurewebsites.net/api/v1/auth/token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: params
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('meridian-token', data.access_token);
+          // Opcional: guardar información del usuario
+          localStorage.setItem('meridian-user', JSON.stringify(data.user));
+          window.location.href = 'Meridian.html';
+        } else {
+          const errorData = await response.json();
+          alert(errorData.detail || 'Credenciales incorrectas');
+          if (btn) { btn.textContent = 'Entrar a Meridian →'; btn.style.pointerEvents = 'auto'; }
+        }
+      } catch (error) {
+        console.error('Error logging in:', error);
+        alert('Error de conexión al servidor');
+        if (btn) { btn.textContent = 'Entrar a Meridian →'; btn.style.pointerEvents = 'auto'; }
+      }
+    }
+    
+    document.getElementById('lg-form').addEventListener('submit', handleLogin);
+    // document.querySelectorAll('.login-sso').forEach(b => b.addEventListener('click', goToApp));
+    // document.getElementById('lg-signup').addEventListener('click', (e) => { e.preventDefault(); goToApp(); });
+  </script>
+</body>
+</html>
