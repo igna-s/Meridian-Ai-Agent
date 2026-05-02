@@ -654,17 +654,21 @@
       <h3 id="lg-title">Bienvenido de vuelta</h3>
       <p class="sub">Ingresá a tu workspace.</p>
 
+      <div style="display:flex;align-items:center;gap:8px;background:oklch(0.25 0.06 145/0.35);border:1px solid oklch(0.85 0.17 145/0.3);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--accent)">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+        Cuenta demo — entrá con un click
+      </div>
       <form id="lg-form">
         <div class="lg-field">
           <label>Email de trabajo</label>
-          <input type="email" placeholder="vos@equipo.com" autocomplete="email" />
+          <input type="email" id="lg-email" value="demo@meridian.app" autocomplete="email" />
         </div>
         <div class="lg-field">
           <label>Contraseña</label>
-          <input type="password" placeholder="••••••••" autocomplete="current-password" />
+          <input type="password" id="lg-password" value="demo1234" autocomplete="current-password" />
         </div>
         <div class="lg-row">
-          <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" /> Recordar 30 días</label>
+          <label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" checked /> Recordar 30 días</label>
           <a href="#">¿Olvidaste?</a>
         </div>
         <button type="submit" class="btn primary" style="width:100%;justify-content:center">Entrar a Meridian →</button>
@@ -1101,52 +1105,14 @@
     overlay.addEventListener('click', (e) => { if (e.target === overlay) closeLogin(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLogin(); });
 
-    // Submit + SSO → Meridian.html (auth integration)
-    async function handleLogin(e) {
+    // Demo login — always succeeds, no backend required
+    function handleLogin(e) {
       e.preventDefault();
       const btn = document.querySelector('#lg-form button[type=submit]');
-      const emailInput = document.querySelector('#lg-form input[type=email]');
-      const passwordInput = document.querySelector('#lg-form input[type=password]');
-      
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      
-      if (!email || !password) {
-        alert('Por favor, ingresá tu email y contraseña.');
-        return;
-      }
-      
       if (btn) { btn.textContent = 'Entrando…'; btn.style.pointerEvents = 'none'; }
-      
-      try {
-        const params = new URLSearchParams();
-        params.append('username', email);
-        params.append('password', password);
-        
-        const response = await fetch('https://banking-rag-auth-api.azurewebsites.net/auth/token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: params
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('meridian-token', data.access_token);
-          // Opcional: guardar información del usuario
-          localStorage.setItem('meridian-user', JSON.stringify(data.user));
-          window.location.href = 'Meridian.html';
-        } else {
-          const errorData = await response.json();
-          alert(errorData.detail || 'Credenciales incorrectas');
-          if (btn) { btn.textContent = 'Entrar a Meridian →'; btn.style.pointerEvents = 'auto'; }
-        }
-      } catch (error) {
-        console.error('Error logging in:', error);
-        alert('Error de conexión al servidor');
-        if (btn) { btn.textContent = 'Entrar a Meridian →'; btn.style.pointerEvents = 'auto'; }
-      }
+      localStorage.setItem('meridian-token', 'demo-token');
+      localStorage.setItem('meridian-user', JSON.stringify({ email: 'demo@meridian.app', name: 'Demo User' }));
+      setTimeout(() => { window.location.href = 'Meridian.html'; }, 400);
     }
     
     document.getElementById('lg-form').addEventListener('submit', handleLogin);
