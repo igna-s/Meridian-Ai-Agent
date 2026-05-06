@@ -19,6 +19,7 @@
 
   <script type="text/babel" src="icons.jsx"></script>
   <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="api-client.jsx"></script>
   <script type="text/babel" src="interactions.jsx"></script>
   <script type="text/babel" src="detail-modals.jsx"></script>
   <script type="text/babel" src="shell.jsx"></script>
@@ -27,7 +28,8 @@
   <script type="text/babel" src="views-more.jsx"></script>
   <script type="text/babel" src="views-settings.jsx"></script>
   <script type="text/babel" src="views-chat.jsx"></script>
-  
+  <script type="text/babel" src="views-code.jsx"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <script type="text/babel">
@@ -140,6 +142,7 @@
           case "team":    return <TeamView />;
           case "settings": return <SettingsView settings={settings} setSettings={setSettingsPersist} />;
           case "chat":    return <ChatView />;
+          case "code":    return <CodeEditorView />;
           default:        return <HomeView setView={setView} setIssueId={setIssueId} />;
         }
       };

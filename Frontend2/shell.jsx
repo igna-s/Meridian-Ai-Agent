@@ -9,6 +9,7 @@ const Sidebar = ({ view, setView, collapsed }) => {
     { id: "roadmap",  label: "Roadmap",    icon: "roadmap" },
     { id: "docs",     label: "Docs",       icon: "docs" },
     { id: "chat",     label: "VaultMind AI", icon: "sparkle" },
+    { id: "code",     label: "Code Editor",  icon: "code" },
     { id: "prs",      label: "Pull requests", icon: "pr" },
     { id: "team",     label: "Team",       icon: "team" },
     { id: "settings", label: "Settings",   icon: "settings" },

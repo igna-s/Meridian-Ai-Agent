@@ -53,6 +53,7 @@ const Icon = ({ name, size = 16, className = "", strokeWidth = 1.6, ...rest }) =
     case "component": return <svg {...common}><path d="M12 2 4 6l8 4 8-4zM4 12l8 4 8-4M4 18l8 4 8-4"/></svg>;
     case "moon": return <svg {...common}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>;
     case "sun": return <svg {...common}><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>;
+    case "code": return <svg {...common}><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg>;
     case "hash": return <svg {...common}><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>;
     case "at": return <svg {...common}><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>;
     default: return <svg {...common}><rect x="4" y="4" width="16" height="16" rx="2"/></svg>;

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VS Code — meridian-platform</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1e1e1e;
+      color: #cccccc;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+    }
+
+    /* ── Title bar ──────────────────────────────────── */
+    .titlebar {
+      height: 30px;
+      background: #3c3c3c;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 0;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .titlebar-dots { display: flex; gap: 6px; margin-right: 12px; }
+    .titlebar-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-close { background: #ff5f57; }
+    .dot-min   { background: #febc2e; }
+    .dot-max   { background: #28c840; }
+    .titlebar-title {
+      flex: 1; text-align: center; font-size: 12px; color: #cccccc; letter-spacing: 0.01em;
+    }
+
+    /* ── Menu bar ───────────────────────────────────── */
+    .menubar {
+      height: 28px;
+      background: #3c3c3c;
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      border-bottom: 1px solid #252526;
+      flex-shrink: 0;
+    }
+    .menu-item {
+      padding: 2px 8px;
+      font-size: 12px;
+      color: #cccccc;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .menu-item:hover { background: rgba(255,255,255,0.1); }
+
+    /* ── Workbench layout ───────────────────────────── */
+    .workbench { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Activity bar ───────────────────────────────── */
+    .activity-bar {
+      width: 48px;
+      background: #333333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 4px;
+      flex-shrink: 0;
+      border-right: 1px solid #252526;
+    }
+    .activity-icon {
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 4px; margin: 1px 0;
+      color: #858585; position: relative;
+    }
+    .activity-icon:hover { color: #cccccc; }
+    .activity-icon.active { color: #ffffff; border-left: 2px solid #007acc; }
+    .activity-icon svg { width: 22px; height: 22px; }
+    .activity-spacer { flex: 1; }
+    .activity-badge {
+      position: absolute; top: 4px; right: 4px;
+      background: #007acc; color: white;
+      font-size: 9px; width: 14px; height: 14px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+    }
+
+    /* ── Primary sidebar ────────────────────────────── */
+    .sidebar {
+      width: 240px; background: #252526; flex-shrink: 0;
+      display: flex; flex-direction: column; border-right: 1px solid #3c3c3c;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      padding: 9px 12px 6px;
+      font-size: 11px; font-weight: 600;
+      color: #bbbbbb; text-transform: uppercase; letter-spacing: 0.8px;
+      flex-shrink: 0;
+    }
+    .file-tree { flex: 1; overflow-y: auto; }
+    .file-tree::-webkit-scrollbar { width: 6px; }
+    .file-tree::-webkit-scrollbar-thumb { background: #424242; border-radius: 3px; }
+    .tree-item {
+      display: flex; align-items: center; gap: 4px;
+      padding: 2px 0 2px 8px;
+      cursor: pointer; white-space: nowrap; color: #cccccc;
+      font-size: 13px;
+    }
+    .tree-item:hover { background: #2a2d2e; }
+    .tree-item.selected { background: #094771; color: #ffffff; }
+    .tree-item.active-file { background: #37373d; }
+    .tree-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .tree-item .label { font-size: 13px; }
+    .i1 { padding-left: 8px; }
+    .i2 { padding-left: 24px; }
+    .i3 { padding-left: 40px; }
+    .i4 { padding-left: 56px; }
+    .folder-icon { color: #dcb67a; }
+    .ts-icon { color: #3178c6; font-size: 10px; font-weight: 700; font-family: monospace; }
+    .tsx-icon { color: #61dafb; font-size: 9px; font-weight: 700; font-family: monospace; }
+    .json-icon { color: #fbc02d; font-size: 9px; font-weight: 700; font-family: monospace; }
+    .md-icon { color: #519aba; font-size: 10px; font-weight: 700; font-family: monospace; }
+    .py-icon { color: #3572a5; font-size: 10px; font-weight: 700; font-family: monospace; }
+    .file-label { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; }
+
+    /* ── Editor area ────────────────────────────────── */
+    .editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Tab bar ────────────────────────────────────── */
+    .tab-bar {
+      height: 35px; background: #2d2d2d;
+      display: flex; align-items: flex-end;
+      border-bottom: 1px solid #252526;
+      overflow-x: auto; flex-shrink: 0;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab {
+      height: 35px; padding: 0 12px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: #969696;
+      cursor: pointer; background: #2d2d2d;
+      border-right: 1px solid #252526;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .tab.active { background: #1e1e1e; color: #ffffff; border-top: 1px solid #007acc; }
+    .tab:hover:not(.active) { background: #2a2d2e; }
+    .tab-close {
+      width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+      border-radius: 3px; opacity: 0; font-size: 14px; color: #cccccc; margin-left: 2px;
+    }
+    .tab:hover .tab-close { opacity: 0.7; }
+    .tab-close:hover { background: rgba(255,255,255,0.1); opacity: 1; }
+
+    /* ── Breadcrumb ─────────────────────────────────── */
+    .breadcrumb {
+      height: 22px; background: #1e1e1e;
+      padding: 0 12px; display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: #969696;
+      border-bottom: 1px solid #2d2d2d; flex-shrink: 0;
+    }
+    .breadcrumb .sep { opacity: 0.4; }
+
+    /* ── Editor + minimap ───────────────────────────── */
+    .editor-container { flex: 1; display: flex; overflow: hidden; }
+    .editor {
+      flex: 1; overflow: auto;
+      padding: 8px 0;
+      font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', Consolas, 'Courier New', monospace;
+      font-size: 14px; line-height: 21px;
+    }
+    .editor::-webkit-scrollbar { width: 10px; height: 10px; }
+    .editor::-webkit-scrollbar-track { background: #1e1e1e; }
+    .editor::-webkit-scrollbar-thumb { background: #424242; border-radius: 2px; }
+    .code-line { display: flex; min-height: 21px; }
+    .code-line:hover { background: rgba(255,255,255,0.02); }
+    .code-line.hl { background: rgba(255,255,255,0.045); }
+    .line-num {
+      width: 52px; text-align: right; padding-right: 16px;
+      color: #858585; flex-shrink: 0; user-select: none; font-size: 13px;
+    }
+    .line-content { flex: 1; white-space: pre; padding-right: 80px; color: #d4d4d4; }
+
+    /* ── Minimap ────────────────────────────────────── */
+    .minimap {
+      width: 64px; background: #1e1e1e;
+      border-left: 1px solid #2d2d2d; flex-shrink: 0;
+      overflow: hidden; position: relative;
+    }
+    .minimap-viewport {
+      position: absolute; left: 0; right: 0; top: 26px; height: 130px;
+      background: rgba(121,121,121,0.1); border: 1px solid rgba(121,121,121,0.15);
+    }
+    .minimap-canvas { padding: 3px 5px; }
+    .mm-line {
+      height: 2px; margin-bottom: 1.5px; border-radius: 1px; opacity: 0.5;
+    }
+
+    /* ── Terminal panel ─────────────────────────────── */
+    .terminal-panel {
+      height: 190px; background: #1e1e1e;
+      border-top: 1px solid #3c3c3c;
+      display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .terminal-header {
+      height: 28px; background: #252526;
+      display: flex; align-items: center; padding: 0 8px; gap: 0;
+      border-bottom: 1px solid #3c3c3c; flex-shrink: 0;
+    }
+    .panel-tab {
+      padding: 0 12px; height: 100%; display: flex; align-items: center;
+      font-size: 11px; color: #969696; cursor: pointer;
+      border-bottom: 1px solid transparent;
+    }
+    .panel-tab.active { color: #cccccc; border-bottom-color: #007acc; }
+    .panel-actions { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+    .panel-btn {
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 3px; color: #858585;
+    }
+    .panel-btn:hover { background: rgba(255,255,255,0.1); color: #cccccc; }
+    .terminal-body {
+      flex: 1; padding: 6px 12px; overflow-y: auto;
+      font-family: 'Cascadia Code', 'JetBrains Mono', Consolas, 'Courier New', monospace;
+      font-size: 13px; line-height: 1.65;
+    }
+    .terminal-body::-webkit-scrollbar { width: 6px; }
+    .terminal-body::-webkit-scrollbar-thumb { background: #424242; border-radius: 3px; }
+    .t-prompt { color: #3fc2fb; }
+    .t-cmd    { color: #cccccc; }
+    .t-out    { color: #858585; }
+    .t-ok     { color: #4ec9b0; }
+    .t-warn   { color: #ffcc02; }
+    .t-err    { color: #f44747; }
+    .t-cursor {
+      display: inline-block; width: 8px; height: 14px;
+      background: #cccccc; vertical-align: text-bottom;
+      animation: blink 1.2s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── Status bar ─────────────────────────────────── */
+    .status-bar {
+      height: 22px; background: #007acc;
+      display: flex; align-items: center; padding: 0;
+      font-size: 12px; color: #ffffff; flex-shrink: 0;
+    }
+    .st-item {
+      padding: 0 8px; cursor: pointer;
+      display: flex; align-items: center; gap: 4px; height: 100%; white-space: nowrap;
+    }
+    .st-item:hover { background: rgba(255,255,255,0.12); }
+    .st-item svg { width: 13px; height: 13px; }
+    .st-right { margin-left: auto; display: flex; }
+
+    /* ── Syntax tokens ──────────────────────────────── */
+    .kw  { color: #569cd6; }
+    .str { color: #ce9178; }
+    .num { color: #b5cea8; }
+    .cmt { color: #6a9955; font-style: italic; }
+    .ty  { color: #4ec9b0; }
+    .fn  { color: #dcdcaa; }
+    .va  { color: #9cdcfe; }
+    .op  { color: #d4d4d4; }
+    .dec { color: #c586c0; }
+    .pr  { color: #9cdcfe; }
+    .pl  { color: #d4d4d4; }
+    .cls { color: #4ec9b0; }
+  </style>
+</head>
+<body>
+
+<!-- ── Title bar ──────────────────────────────────────── -->
+<div class="titlebar">
+  <div class="titlebar-dots">
+    <div class="titlebar-dot dot-close"></div>
+    <div class="titlebar-dot dot-min"></div>
+    <div class="titlebar-dot dot-max"></div>
+  </div>
+  <div class="titlebar-title">triage.ts — meridian-platform — Visual Studio Code</div>
+</div>
+
+<!-- ── Menu bar ───────────────────────────────────────── -->
+<div class="menubar">
+  <div class="menu-item">File</div>
+  <div class="menu-item">Edit</div>
+  <div class="menu-item">Selection</div>
+  <div class="menu-item">View</div>
+  <div class="menu-item">Go</div>
+  <div class="menu-item">Run</div>
+  <div class="menu-item">Terminal</div>
+  <div class="menu-item">Help</div>
+</div>
+
+<!-- ── Workbench ──────────────────────────────────────── -->
+<div class="workbench">
+
+  <!-- Activity bar -->
+  <div class="activity-bar">
+    <div class="activity-icon active" title="Explorer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <path d="M14 2v6h6M8 13h8M8 17h6"/>
+      </svg>
+    </div>
+    <div class="activity-icon" title="Search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+      </svg>
+    </div>
+    <div class="activity-icon" title="Source Control" style="position:relative">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/>
+        <path d="M18 8.5v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4v-3"/><path d="M12 12.5v3"/>
+      </svg>
+      <div class="activity-badge">3</div>
+    </div>
+    <div class="activity-icon" title="Run and Debug">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M6 3v18l15-9z"/>
+      </svg>
+    </div>
+    <div class="activity-icon" title="Extensions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M12 2l3.5 6H20l-4 5 1.5 6L12 16l-5.5 3L8 13 4 8h4.5z"/>
+      </svg>
+    </div>
+    <div class="activity-spacer"></div>
+    <div class="activity-icon" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.7l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.7-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.6 1.6 0 0 0-1-1.5 1.6 1.6 0 0 0-1.7.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.7 1.6 1.6 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.6 1.6 0 0 0 1.5-1 1.6 1.6 0 0 0-.3-1.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.7.3h.1a1.6 1.6 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.6 1.6 0 0 0 1 1.5h.1a1.6 1.6 0 0 0 1.7-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.7v.1a1.6 1.6 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Primary sidebar (file explorer) -->
+  <div class="sidebar">
+    <div class="sidebar-header">Explorer</div>
+    <div class="file-tree">
+
+      <!-- Root -->
+      <div class="tree-item i1">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon">
+          <path d="M1.5 14h13l.5-6H1l.5 6zm1-7h11V6a1 1 0 0 0-1-1H7.5L6 3.5H3a1 1 0 0 0-1 1V7z"/>
+        </svg>
+        <span class="label" style="font-weight:600">MERIDIAN-PLATFORM</span>
+      </div>
+
+      <!-- .vscode -->
+      <div class="tree-item i2">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon" style="opacity:0.6">
+          <path d="M13.5 3H7.707L6.854 2.146A.5.5 0 0 0 6.5 2h-4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"/>
+        </svg>
+        <span class="label" style="opacity:0.7">.vscode</span>
+      </div>
+
+      <!-- src (open) -->
+      <div class="tree-item i2">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon">
+          <path d="M1.5 14h13l.5-6H1l.5 6zm1-7h11V6a1 1 0 0 0-1-1H7.5L6 3.5H3a1 1 0 0 0-1 1V7z"/>
+        </svg>
+        <span class="label">src</span>
+      </div>
+
+      <!-- src/agent (open) -->
+      <div class="tree-item i3">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon">
+          <path d="M1.5 14h13l.5-6H1l.5 6zm1-7h11V6a1 1 0 0 0-1-1H7.5L6 3.5H3a1 1 0 0 0-1 1V7z"/>
+        </svg>
+        <span class="label">agent</span>
+      </div>
+
+      <div class="tree-item i4 active-file">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">orchestra.ts</span>
+      </div>
+      <div class="tree-item i4 selected">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">triage.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">sprint.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">tools.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">state.ts</span>
+      </div>
+
+      <!-- src/api -->
+      <div class="tree-item i3">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon">
+          <path d="M13.5 3H7.707L6.854 2.146A.5.5 0 0 0 6.5 2h-4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"/>
+        </svg>
+        <span class="label">api</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">client.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">auth.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">middleware.ts</span>
+      </div>
+
+      <!-- src/components (open) -->
+      <div class="tree-item i3">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon">
+          <path d="M1.5 14h13l.5-6H1l.5 6zm1-7h11V6a1 1 0 0 0-1-1H7.5L6 3.5H3a1 1 0 0 0-1 1V7z"/>
+        </svg>
+        <span class="label">components</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label tsx-icon">TSX</span>
+        <span class="label">IssueCard.tsx</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label tsx-icon">TSX</span>
+        <span class="label">Sidebar.tsx</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label tsx-icon">TSX</span>
+        <span class="label">ChatPanel.tsx</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label tsx-icon">TSX</span>
+        <span class="label">SprintBoard.tsx</span>
+      </div>
+
+      <!-- src/types -->
+      <div class="tree-item i3">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon">
+          <path d="M13.5 3H7.707L6.854 2.146A.5.5 0 0 0 6.5 2h-4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"/>
+        </svg>
+        <span class="label">types</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">index.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">issue.ts</span>
+      </div>
+      <div class="tree-item i4">
+        <span class="file-label ts-icon">TS</span>
+        <span class="label">triage.ts</span>
+      </div>
+
+      <!-- src/hooks -->
+      <div class="tree-item i3">
+        <svg viewBox="0 0 16 16" fill="currentColor" class="folder-icon" style="opacity:0.6">
+          <path d="M13.5 3H7.707L6.854 2.146A.5.5 0 0 0 6.5 2h-4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"/>
+        </svg>
+        <span class="label">hooks</span>
+      </div>
+
+      <!-- root config files -->
+      <div class="tree-item i2">
+        <span class="file-label json-icon">JSON</span>
+        <span class="label">package.json</span>
+      </div>
+      <div class="tree-item i2">
+        <span class="file-label json-icon">JSON</span>
+        <span class="label">tsconfig.json</span>
+      </div>
+      <div class="tree-item i2">
+        <span class="file-label md-icon">MD</span>
+        <span class="label">README.md</span>
+      </div>
+      <div class="tree-item i2">
+        <span class="file-label" style="color:#4ec9b0;font-size:9px;font-weight:700;font-family:monospace">ENV</span>
+        <span class="label" style="opacity:0.6">.env.example</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Editor area -->
+  <div class="editor-area">
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <div class="tab">
+        <span class="ts-icon" style="font-size:9px">TS</span>
+        orchestra.ts
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab active">
+        <span class="ts-icon" style="font-size:9px">TS</span>
+        triage.ts
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab">
+        <span class="ts-icon" style="font-size:9px">TS</span>
+        sprint.ts
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab">
+        <span class="tsx-icon" style="font-size:9px">TSX</span>
+        ChatPanel.tsx
+        <span class="tab-close">×</span>
+      </div>
+      <div class="tab">
+        <span class="json-icon" style="font-size:9px">JSON</span>
+        package.json
+        <span class="tab-close">×</span>
+      </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span>src</span>
+      <span class="sep">›</span>
+      <span>agent</span>
+      <span class="sep">›</span>
+      <span style="color:#cccccc">triage.ts</span>
+    </div>
+
+    <!-- Editor + minimap -->
+    <div class="editor-container">
+      <div class="editor" id="editor"></div>
+
+      <div class="minimap">
+        <div class="minimap-viewport"></div>
+        <div class="minimap-canvas" id="mm"></div>
+      </div>
+    </div>
+
+    <!-- Terminal -->
+    <div class="terminal-panel">
+      <div class="terminal-header">
+        <div class="panel-tab">PROBLEMS <span style="margin-left:5px;background:#4ec9b0;color:#000;font-size:10px;padding:0 5px;border-radius:2px">2</span></div>
+        <div class="panel-tab">OUTPUT</div>
+        <div class="panel-tab active">TERMINAL</div>
+        <div class="panel-tab">DEBUG CONSOLE</div>
+        <div class="panel-actions">
+          <div class="panel-btn" title="Split terminal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/>
+            </svg>
+          </div>
+          <div class="panel-btn" title="New terminal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </div>
+          <div class="panel-btn" title="Close panel">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 6l12 12M18 6 6 18"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">~/meridian-platform</span> <span class="t-cmd">$ npm run dev</span></div>
+        <div class="t-out"></div>
+        <div class="t-out">&gt; meridian-platform@0.9.2 dev</div>
+        <div class="t-out">&gt; ts-node src/agent/orchestra.ts --watch</div>
+        <div class="t-out"></div>
+        <div class="t-ok">✓  Agent orchestrator ready on :8080</div>
+        <div class="t-ok">✓  Triage pipeline initialized (3 workers)</div>
+        <div class="t-ok">✓  RAG index loaded — 4,821 chunks</div>
+        <div class="t-warn">⚠  WebSearch tool disabled — set WEB_SEARCH_KEY to enable</div>
+        <div class="t-out"></div>
+        <div><span class="t-prompt">~/meridian-platform</span> <span class="t-cmd">$ git status</span></div>
+        <div class="t-out">On branch <span style="color:#c586c0">feat/triage-v2</span></div>
+        <div class="t-out">Changes not staged for commit:</div>
+        <div class="t-out">&nbsp;&nbsp;<span class="t-err">modified:</span>   src/agent/triage.ts</div>
+        <div class="t-out">&nbsp;&nbsp;<span class="t-err">modified:</span>   src/agent/tools.ts</div>
+        <div class="t-out">&nbsp;&nbsp;<span class="t-ok">new file:</span>   src/types/triage.ts</div>
+        <div class="t-out"></div>
+        <div><span class="t-prompt">~/meridian-platform</span> <span class="t-cmd">$</span> <span class="t-cursor"></span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Status bar ──────────────────────────────────────── -->
+<div class="status-bar">
+  <div class="st-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/>
+      <path d="M18 8.5v3a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4v-3"/><path d="M12 12.5v3"/>
+    </svg>
+    feat/triage-v2
+  </div>
+  <div class="st-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+    </svg>
+    0 errors, 2 warnings
+  </div>
+  <div class="st-right">
+    <div class="st-item">Ln 47, Col 18</div>
+    <div class="st-item">Spaces: 2</div>
+    <div class="st-item">UTF-8</div>
+    <div class="st-item">CRLF</div>
+    <div class="st-item">TypeScript</div>
+    <div class="st-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+      </svg>
+      Prettier
+    </div>
+  </div>
+</div>
+
+<script>
+  const lines = [
+    [1,  `<span class="cmt">// triage.ts — AI-powered issue classification pipeline</span>`],
+    [2,  `<span class="cmt">// Routes each issue to the right team and assigns a priority score</span>`],
+    [3,  ``],
+    [4,  `<span class="kw">import</span> <span class="pl">{ </span><span class="va">OpenAI</span><span class="pl"> }</span> <span class="kw">from</span> <span class="str">"openai"</span><span class="pl">;</span>`],
+    [5,  `<span class="kw">import</span> <span class="kw">type</span> <span class="pl">{ </span><span class="ty">Issue</span><span class="pl">, </span><span class="ty">TriageResult</span><span class="pl">, </span><span class="ty">Priority</span><span class="pl"> }</span> <span class="kw">from</span> <span class="str">"../types"</span><span class="pl">;</span>`],
+    [6,  `<span class="kw">import</span> <span class="pl">{ </span><span class="fn">loadPrompt</span><span class="pl">, </span><span class="fn">truncateContext</span><span class="pl"> }</span> <span class="kw">from</span> <span class="str">"./tools"</span><span class="pl">;</span>`],
+    [7,  ``],
+    [8,  `<span class="kw">const</span> <span class="va">client</span> <span class="op">=</span> <span class="kw">new</span> <span class="cls">OpenAI</span><span class="pl">({</span>`],
+    [9,  `  <span class="pr">apiKey</span><span class="pl">: </span><span class="va">process</span><span class="op">.</span><span class="va">env</span><span class="op">.</span><span class="va">OPENAI_API_KEY</span><span class="pl">,</span>`],
+    [10, `<span class="pl">});</span>`],
+    [11, ``],
+    [12, `<span class="kw">const</span> <span class="va">TRIAGE_MODEL</span> <span class="op">=</span> <span class="str">"gpt-4o-mini"</span><span class="pl">;</span>`],
+    [13, `<span class="kw">const</span> <span class="va">MAX_CONTEXT_TOKENS</span> <span class="op">=</span> <span class="num">2048</span><span class="pl">;</span>`],
+    [14, ``],
+    [15, `<span class="kw">interface</span> <span class="ty">TriageOptions</span> <span class="pl">{</span>`],
+    [16, `  <span class="pr">dryRun</span><span class="pl">?: </span><span class="ty">boolean</span><span class="pl">;</span>`],
+    [17, `  <span class="pr">maxRetries</span><span class="pl">?: </span><span class="ty">number</span><span class="pl">;</span>`],
+    [18, `  <span class="pr">confidenceThreshold</span><span class="pl">?: </span><span class="ty">number</span><span class="pl">;</span>`],
+    [19, `<span class="pl">}</span>`],
+    [20, ``],
+    [21, `<span class="dec">export</span> <span class="kw">async</span> <span class="kw">function</span> <span class="fn">triageIssue</span><span class="pl">(</span>`],
+    [22, `  <span class="va">issue</span><span class="pl">: </span><span class="ty">Issue</span><span class="pl">,</span>`],
+    [23, `  <span class="va">opts</span><span class="pl">: </span><span class="ty">TriageOptions</span> <span class="op">=</span> <span class="pl">{}</span>`],
+    [24, `<span class="pl">): </span><span class="ty">Promise</span><span class="pl">&lt;</span><span class="ty">TriageResult</span><span class="pl">&gt; {</span>`],
+    [25, `  <span class="kw">const</span> <span class="pl">{</span>`],
+    [26, `    <span class="va">dryRun</span> <span class="op">=</span> <span class="kw">false</span><span class="pl">,</span>`],
+    [27, `    <span class="va">maxRetries</span> <span class="op">=</span> <span class="num">3</span><span class="pl">,</span>`],
+    [28, `    <span class="va">confidenceThreshold</span> <span class="op">=</span> <span class="num">0.75</span>`],
+    [29, `  <span class="pl">} =</span> <span class="va">opts</span><span class="pl">;</span>`],
+    [30, ``],
+    [31, `  <span class="kw">const</span> <span class="va">systemPrompt</span> <span class="op">=</span> <span class="kw">await</span> <span class="fn">loadPrompt</span><span class="pl">(</span><span class="str">"triage"</span><span class="pl">);</span>`],
+    [32, `  <span class="kw">const</span> <span class="va">context</span> <span class="op">=</span> <span class="fn">truncateContext</span><span class="pl">({</span>`],
+    [33, `    <span class="pr">title</span><span class="pl">: </span><span class="va">issue</span><span class="op">.</span><span class="va">title</span><span class="pl">,</span>`],
+    [34, `    <span class="pr">body</span><span class="pl">:  </span><span class="va">issue</span><span class="op">.</span><span class="va">body</span><span class="pl">,</span>`],
+    [35, `    <span class="pr">labels</span><span class="pl">: </span><span class="va">issue</span><span class="op">.</span><span class="va">labels</span><span class="pl">,</span>`],
+    [36, `  <span class="pl">}, </span><span class="va">MAX_CONTEXT_TOKENS</span><span class="pl">);</span>`],
+    [37, ``],
+    [38, `  <span class="kw">let</span> <span class="va">attempt</span> <span class="op">=</span> <span class="num">0</span><span class="pl">;</span>`],
+    [39, `  <span class="kw">while</span> <span class="pl">(</span><span class="va">attempt</span> <span class="op">&lt;</span> <span class="va">maxRetries</span><span class="pl">) {</span>`],
+    [40, `    <span class="kw">try</span> <span class="pl">{</span>`],
+    [41, `      <span class="kw">const</span> <span class="va">response</span> <span class="op">=</span> <span class="kw">await</span> <span class="va">client</span><span class="op">.</span><span class="va">chat</span><span class="op">.</span><span class="va">completions</span><span class="op">.</span><span class="fn">create</span><span class="pl">({</span>`],
+    [42, `        <span class="pr">model</span><span class="pl">: </span><span class="va">TRIAGE_MODEL</span><span class="pl">,</span>`],
+    [43, `        <span class="pr">response_format</span><span class="pl">: { </span><span class="pr">type</span><span class="pl">: </span><span class="str">"json_object"</span> <span class="pl">},</span>`],
+    [44, `        <span class="pr">temperature</span><span class="pl">: </span><span class="num">0.2</span><span class="pl">,</span>`],
+    [45, `        <span class="pr">messages</span><span class="pl">: [</span>`],
+    [46, `          <span class="pl">{ </span><span class="pr">role</span><span class="pl">: </span><span class="str">"system"</span><span class="pl">, </span><span class="pr">content</span><span class="pl">: </span><span class="va">systemPrompt</span> <span class="pl">},</span>`],
+    [47, `          <span class="pl">{ </span><span class="pr">role</span><span class="pl">: </span><span class="str">"user"</span><span class="pl">,   </span><span class="pr">content</span><span class="pl">: </span><span class="va">context</span> <span class="pl">},</span>`],
+    [48, `        <span class="pl">],</span>`],
+    [49, `      <span class="pl">});</span>`],
+    [50, ``],
+    [51, `      <span class="kw">const</span> <span class="va">raw</span> <span class="op">=</span> <span class="va">response</span><span class="op">.</span><span class="va">choices</span><span class="pl">[</span><span class="num">0</span><span class="pl">]</span><span class="op">.</span><span class="va">message</span><span class="op">.</span><span class="va">content</span><span class="pl">;</span>`],
+    [52, `      <span class="kw">if</span> <span class="pl">(!</span><span class="va">raw</span><span class="pl">) </span><span class="kw">throw</span> <span class="kw">new</span> <span class="cls">Error</span><span class="pl">(</span><span class="str">"Empty response from model"</span><span class="pl">);</span>`],
+    [53, ``],
+    [54, `      <span class="kw">const</span> <span class="va">parsed</span> <span class="op">=</span> <span class="cls">JSON</span><span class="op">.</span><span class="fn">parse</span><span class="pl">(</span><span class="va">raw</span><span class="pl">) </span><span class="kw">as</span> <span class="ty">TriageResult</span><span class="pl">;</span>`],
+    [55, ``],
+    [56, `      <span class="kw">if</span> <span class="pl">(</span><span class="va">parsed</span><span class="op">.</span><span class="va">confidence</span> <span class="op">&lt;</span> <span class="va">confidenceThreshold</span><span class="pl">) {</span>`],
+    [57, `        <span class="va">console</span><span class="op">.</span><span class="fn">warn</span><span class="pl">(</span><span class="str">\`Low confidence: \${parsed.confidence.toFixed(2)}\`</span><span class="pl">);</span>`],
+    [58, `      <span class="pl">}</span>`],
+    [59, ``],
+    [60, `      <span class="kw">if</span> <span class="pl">(</span><span class="va">dryRun</span><span class="pl">) {</span>`],
+    [61, `        <span class="va">console</span><span class="op">.</span><span class="fn">log</span><span class="pl">(</span><span class="str">"[dry-run] triage result:"</span><span class="pl">, </span><span class="va">parsed</span><span class="pl">);</span>`],
+    [62, `        <span class="kw">return</span> <span class="pl">{ ...</span><span class="va">parsed</span><span class="pl">, </span><span class="pr">applied</span><span class="pl">: </span><span class="kw">false</span> <span class="pl">};</span>`],
+    [63, `      <span class="pl">}</span>`],
+    [64, ``],
+    [65, `      <span class="kw">return</span> <span class="pl">{ ...</span><span class="va">parsed</span><span class="pl">, </span><span class="pr">applied</span><span class="pl">: </span><span class="kw">true</span> <span class="pl">};</span>`],
+    [66, ``],
+    [67, `    <span class="pl">} </span><span class="kw">catch</span> <span class="pl">(</span><span class="va">err</span><span class="pl">) {</span>`],
+    [68, `      <span class="va">attempt</span><span class="op">++</span><span class="pl">;</span>`],
+    [69, `      <span class="kw">if</span> <span class="pl">(</span><span class="va">attempt</span> <span class="op">>=</span> <span class="va">maxRetries</span><span class="pl">) </span><span class="kw">throw</span> <span class="va">err</span><span class="pl">;</span>`],
+    [70, `      <span class="kw">await</span> <span class="fn">sleep</span><span class="pl">(</span><span class="num">200</span> <span class="op">*</span> <span class="va">attempt</span><span class="pl">);</span>`],
+    [71, `    <span class="pl">}</span>`],
+    [72, `  <span class="pl">}</span>`],
+    [73, ``],
+    [74, `  <span class="kw">throw</span> <span class="kw">new</span> <span class="cls">Error</span><span class="pl">(</span><span class="str">"Triage failed after all retries"</span><span class="pl">);</span>`],
+    [75, `<span class="pl">}</span>`],
+    [76, ``],
+    [77, `<span class="dec">export</span> <span class="kw">function</span> <span class="fn">mapPriority</span><span class="pl">(</span><span class="va">label</span><span class="pl">: </span><span class="ty">string</span><span class="pl">): </span><span class="ty">Priority</span> <span class="pl">{</span>`],
+    [78, `  <span class="kw">const</span> <span class="va">map</span><span class="pl">: </span><span class="ty">Record</span><span class="pl">&lt;</span><span class="ty">string</span><span class="pl">, </span><span class="ty">Priority</span><span class="pl">&gt; = {</span>`],
+    [79, `    <span class="str">"critical"</span><span class="pl">: </span><span class="str">"urgent"</span><span class="pl">,</span>`],
+    [80, `    <span class="str">"high"</span><span class="pl">:     </span><span class="str">"high"</span><span class="pl">,</span>`],
+    [81, `    <span class="str">"medium"</span><span class="pl">:   </span><span class="str">"medium"</span><span class="pl">,</span>`],
+    [82, `    <span class="str">"low"</span><span class="pl">:      </span><span class="str">"low"</span><span class="pl">,</span>`],
+    [83, `  <span class="pl">};</span>`],
+    [84, `  <span class="kw">return</span> <span class="va">map</span><span class="pl">[</span><span class="va">label</span><span class="op">.</span><span class="fn">toLowerCase</span><span class="pl">()]</span> <span class="op">??</span> <span class="str">"medium"</span><span class="pl">;</span>`],
+    [85, `<span class="pl">}</span>`],
+    [86, ``],
+    [87, `<span class="kw">function</span> <span class="fn">sleep</span><span class="pl">(</span><span class="va">ms</span><span class="pl">: </span><span class="ty">number</span><span class="pl">): </span><span class="ty">Promise</span><span class="pl">&lt;</span><span class="ty">void</span><span class="pl">&gt; {</span>`],
+    [88, `  <span class="kw">return</span> <span class="kw">new</span> <span class="ty">Promise</span><span class="pl">(</span><span class="va">resolve</span> <span class="op">=&gt;</span> <span class="fn">setTimeout</span><span class="pl">(</span><span class="va">resolve</span><span class="pl">, </span><span class="va">ms</span><span class="pl">));</span>`],
+    [89, `<span class="pl">}</span>`],
+  ];
+
+  const HL = new Set([41, 42, 43, 44, 45, 46, 47, 48, 49]);
+  const editor = document.getElementById("editor");
+  const mm = document.getElementById("mm");
+  const mmColors = ["#569cd6","#ce9178","#6a9955","#d4d4d4","#4ec9b0","#dcdcaa","#9cdcfe","#c586c0"];
+
+  lines.forEach(([n, html]) => {
+    const row = document.createElement("div");
+    row.className = "code-line" + (HL.has(n) ? " hl" : "");
+    row.innerHTML = `<span class="line-num">${n}</span><span class="line-content">${html}</span>`;
+    editor.appendChild(row);
+
+    const ml = document.createElement("div");
+    ml.className = "mm-line";
+    ml.style.background = html ? mmColors[n % mmColors.length] : "transparent";
+    ml.style.width = (Math.random() * 55 + 15) + "%";
+    mm.appendChild(ml);
+  });
+
+  // Scroll to show the highlighted block
+  editor.scrollTop = (39 - 6) * 21;
+</script>
+
+</body>
+</html>
