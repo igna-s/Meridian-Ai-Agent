@@ -528,7 +528,11 @@ function saveCurrent() {
 
 // ── New file prompt ────────────────────────────────────────────────────
 function newFile() {
-  createFile('notifier.ts', '');
+  const name = prompt('Nombre del archivo (ej: index.html, app.js):');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (files[trimmed] !== undefined) { openFile(trimmed); return; }
+  createFile(trimmed);
 }
 
 // ── Render ─────────────────────────────────────────────────────────────
@@ -554,9 +558,16 @@ function renderTree() {
     </div>`).join('');
 }
 
+function isRunnable(name) {
+  if (!name) return false;
+  const ext = name.split('.').pop().toLowerCase();
+  return ext === 'html' || ext === 'htm';
+}
+
 function renderTabs() {
   const bar = document.getElementById('tab-bar');
-  const runBtn = `<button class="run-btn" id="run-btn" ${active ? '' : 'disabled'} onclick="runActive()">▶ Run</button>`;
+  const canRun = isRunnable(active);
+  const runBtn = `<button class="run-btn" id="run-btn" ${canRun ? '' : 'disabled'} onclick="runActive()">▶ Run</button>`;
   if (!openTabs.length) { bar.innerHTML = runBtn; return; }
   bar.innerHTML = openTabs.map(n => `
     <div class="tab ${n === active ? 'active' : ''}" data-file="${esc(n)}">
@@ -566,34 +577,17 @@ function renderTabs() {
 }
 
 function renderEditor() {
-  const welcome  = document.getElementById('editor-welcome');
-  const wrapper  = document.getElementById('editor-wrapper');
-  const hlView   = document.getElementById('code-hl-view');
-  const aiBar    = document.getElementById('ai-bar');
-  const readyBar = document.getElementById('ready-bar');
-  const ta       = document.getElementById('code-textarea');
+  const welcome = document.getElementById('editor-welcome');
+  const wrapper = document.getElementById('editor-wrapper');
+  const ta      = document.getElementById('code-textarea');
   document.getElementById('titlebar-title').textContent = active ? `${active} — Code Editor` : 'Code Editor — Meridian';
-
-  const isNotifier = active === 'notifier.ts';
-  aiBar.classList.toggle('visible',    isNotifier && !codeGenDone && !codeStreaming);
-  readyBar.classList.toggle('visible', isNotifier && codeGenDone);
 
   if (!active) {
     welcome.style.display = 'flex';
     wrapper.style.display = 'none';
-    hlView.style.display  = 'none';
-    ta.style.display      = '';
-  } else if (isNotifier && (codeGenDone || codeStreaming)) {
-    welcome.style.display = 'none';
-    wrapper.style.display = 'flex';
-    ta.style.display      = 'none';
-    hlView.style.display  = 'block';
-    if (codeGenDone) updateLineNumsForHL();
   } else {
     welcome.style.display = 'none';
     wrapper.style.display = 'flex';
-    ta.style.display      = '';
-    hlView.style.display  = 'none';
     ta.value = files[active] || '';
     updateLineNums();
   }
@@ -713,14 +707,15 @@ async function runFile(name) {
   if (content === undefined) return 'Error: archivo no encontrado';
   const ext = name.split('.').pop().toLowerCase();
   if (ext === 'html' || ext === 'htm') return runHTML(name, content);
-  if (ext === 'js'   || ext === 'mjs') return await runJS(name, content);
-  termLine('warn', `No sé ejecutar archivos .${ext}`);
+  termLine('warn', `Solo se pueden ejecutar archivos HTML (.html)`);
   return `No ejecutable: .${ext}`;
 }
 
 function runHTML(name, content) {
   termCmd(`open ${name}`);
-  termLine('ok', `✓ Preview de ${name} abierto`);
+  const lines = content.split('\n').length;
+  termLine('out', `  Cargando ${name} (${lines} líneas)…`);
+  termLine('ok', `✓ ${name} ejecutado — Preview listo`);
   document.getElementById('preview-iframe').srcdoc = content;
   setPanel('preview');
   return 'HTML preview abierto';
