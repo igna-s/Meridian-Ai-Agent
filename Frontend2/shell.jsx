@@ -12,6 +12,7 @@ const Sidebar = ({ view, setView, collapsed }) => {
     { id: "code",     label: "Code Editor",  icon: "code" },
     { id: "compute",  label: "Compute",      icon: "sprint" },
     { id: "aimarket", label: "AI Infrastructure", icon: "bolt" },
+    { id: "nexus",    label: "Nexus",        icon: "sparkle" },
     { id: "prs",      label: "Pull requests", icon: "pr" },
     { id: "team",     label: "Team",       icon: "team" },
     { id: "settings", label: "Settings",   icon: "settings" },
@@ -93,6 +94,7 @@ const Topbar = ({ view, onToggleSidebar, onOpenPalette, onOpenInbox, onOpenTweak
     chat: ["VaultMind AI", "Chat"],
     compute:  ["Compute", "GPU Instances"],
     aimarket: ["AI Infrastructure", "Studios & Models"],
+    nexus:    ["Nexus", "Cloud AI Platform"],
     settings: ["Settings", "Workspace"],
   }[view] || ["Home"];
 

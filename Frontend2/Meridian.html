@@ -32,6 +32,7 @@
   <script type="text/babel" src="views-code.jsx"></script>
   <script type="text/babel" src="views-compute.jsx"></script>
   <script type="text/babel" src="views-ai-marketplace.jsx"></script>
+  <script type="text/babel" src="views-nexus.jsx"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -167,6 +168,7 @@
           case "code":    return <CodeEditorView />;
           case "compute":  return <ComputeView />;
           case "aimarket": return <AIMarketplaceView />;
+          case "nexus":    return <NexusView />;
           default:        return <HomeView setView={setView} setIssueId={setIssueId} />;
         }
       };
