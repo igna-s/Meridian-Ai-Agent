@@ -1,14 +1,14 @@
 // AI Marketplace — Studios, Model APIs, Storage, Templates
 
 const STUDIO_GPU_TABLE = [
-  { id: "t4",    name: "T4",       speed: 125,  mem: 16,  cpus: 8,   priceHr: 0.34, spot: 0.17,  wait: 2, avail: true },
-  { id: "l4",    name: "L4",       speed: 121,  mem: 24,  cpus: 8,   priceHr: 0.53, spot: 0.27,  wait: 2, avail: true },
-  { id: "l40s",  name: "L40S",     speed: 362,  mem: 48,  cpus: 16,  priceHr: 1.67, spot: 0.84,  wait: 2, avail: true },
-  { id: "rtx6k", name: "RTX 6000", speed: 500,  mem: 96,  cpus: 48,  priceHr: 1.43, spot: 0.72,  wait: 2, avail: true },
-  { id: "a100",  name: "A100",     speed: 312,  mem: 40,  cpus: 30,  priceHr: 3.06, spot: 1.53,  wait: 2, avail: true },
-  { id: "h100",  name: "H100",     speed: 1979, mem: 80,  cpus: 26,  priceHr: 5.17, spot: 2.59,  wait: 2, avail: true },
-  { id: "h200",  name: "H200",     speed: 1979, mem: 141, cpus: 16,  priceHr: 6.99, spot: null,  wait: 3, avail: false },
-  { id: "b200",  name: "B200",     speed: 4500, mem: 180, cpus: 224, priceHr: 35.91, spot: null, wait: 4, avail: true },
+  { id: "v520",  name: "V520",     speed: 18,   mem: 8,   cpus: 8,   priceHr: 0.29, spot: 0.15,  wait: 2, avail: true },
+  { id: "v620",  name: "V620",     speed: 105,  mem: 32,  cpus: 8,   priceHr: 0.53, spot: 0.27,  wait: 2, avail: true },
+  { id: "w7800", name: "W7800",    speed: 89,   mem: 32,  cpus: 16,  priceHr: 1.67, spot: 0.84,  wait: 2, avail: true },
+  { id: "w7900", name: "W7900",    speed: 123,  mem: 48,  cpus: 48,  priceHr: 1.43, spot: 0.72,  wait: 2, avail: true },
+  { id: "mi210", name: "MI210",    speed: 181,  mem: 64,  cpus: 30,  priceHr: 3.06, spot: 1.53,  wait: 2, avail: true },
+  { id: "mi250x",name: "MI250X",   speed: 383,  mem: 128, cpus: 26,  priceHr: 5.17, spot: 2.59,  wait: 2, avail: true },
+  { id: "mi300a",name: "MI300A",   speed: 3800, mem: 128, cpus: 16,  priceHr: 6.99, spot: null,  wait: 3, avail: false },
+  { id: "mi300x",name: "MI300X",   speed: 10496,mem: 192, cpus: 224, priceHr: 35.91, spot: null, wait: 4, avail: true },
 ];
 
 const STUDIO_TYPES = [
@@ -37,18 +37,18 @@ const STORAGE_PLANS = [
 ];
 
 const TEMPLATES = [
-  { id: "llm-ft",    name: "LLM Fine-tuning",       gpu: "A100 40 GB", icon: "sprint",    tags: ["PyTorch","LoRA","HuggingFace"],  desc: "LoRA / QLoRA fine-tuning with Accelerate & Transformers." },
-  { id: "rag",       name: "RAG Pipeline",           gpu: "L40S",       icon: "database",  tags: ["LangChain","pgvector","FastAPI"], desc: "Vector store + retrieval-augmented generation ready to deploy." },
-  { id: "sdxl",      name: "Stable Diffusion XL",   gpu: "RTX 6000",   icon: "star",      tags: ["Diffusers","ComfyUI","LoRA"],     desc: "SDXL inference + LoRA training environment pre-configured." },
-  { id: "whisper",   name: "Whisper Transcription",  gpu: "T4",         icon: "message",   tags: ["Whisper","FastAPI","Batch"],      desc: "Large-v3 Whisper for batch audio transcription at scale." },
-  { id: "vision",    name: "Vision Classifier",      gpu: "L4",         icon: "eye",       tags: ["torchvision","ViT","W&B"],        desc: "EfficientNet / ViT training with Weights & Biases logging." },
-  { id: "embed-srv", name: "Embedding Server",       gpu: "T4",         icon: "component", tags: ["vLLM","FastAPI","Redis"],         desc: "Deploy your own embedding model with vLLM + FastAPI caching." },
+  { id: "llm-ft",    name: "LLM Fine-tuning",       gpu: "MI210 64 GB", icon: "sprint",    tags: ["PyTorch","LoRA","HuggingFace"],  desc: "LoRA / QLoRA fine-tuning with Accelerate & Transformers." },
+  { id: "rag",       name: "RAG Pipeline",           gpu: "W7800",       icon: "database",  tags: ["LangChain","pgvector","FastAPI"], desc: "Vector store + retrieval-augmented generation ready to deploy." },
+  { id: "sdxl",      name: "Stable Diffusion XL",   gpu: "W7900",   icon: "star",      tags: ["Diffusers","ComfyUI","LoRA"],     desc: "SDXL inference + LoRA training environment pre-configured." },
+  { id: "whisper",   name: "Whisper Transcription",  gpu: "V520",         icon: "message",   tags: ["Whisper","FastAPI","Batch"],      desc: "Large-v3 Whisper for batch audio transcription at scale." },
+  { id: "vision",    name: "Vision Classifier",      gpu: "V620",         icon: "eye",       tags: ["torchvision","ViT","W&B"],        desc: "EfficientNet / ViT training with Weights & Biases logging." },
+  { id: "embed-srv", name: "Embedding Server",       gpu: "V520",         icon: "component", tags: ["vLLM","FastAPI","Redis"],         desc: "Deploy your own embedding model with vLLM + FastAPI caching." },
 ];
 
 // ---- Studios Tab ----
 const StudiosTab = () => {
   const [studioType, setStudioType]   = React.useState("ai-dev");
-  const [selectedGpu, setSelectedGpu] = React.useState("l40s");
+  const [selectedGpu, setSelectedGpu] = React.useState("w7800");
   const [qty, setQty]                 = React.useState(1);
   const [interruptible, setInterruptible] = React.useState(true);
   const [mode, setMode]               = React.useState("gpu");
@@ -243,11 +243,11 @@ const StudiosTab = () => {
         <div className="card" style={{ padding: 14 }}>
           <div className="muted-2 mono" style={{ fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 10 }}>Live availability</div>
           {[
-            { label: "H100 SXM",  slots: 2 },
-            { label: "A100 80G",  slots: 8 },
-            { label: "L40S",      slots: 11 },
-            { label: "RTX 6000",  slots: 5 },
-            { label: "T4",        slots: 24 },
+            { label: "MI300X",  slots: 2 },
+            { label: "MI250X",  slots: 8 },
+            { label: "W7800",      slots: 11 },
+            { label: "W7900",  slots: 5 },
+            { label: "V520",        slots: 24 },
           ].map(a => (
             <div key={a.label} className="flex items-center justify-between" style={{ fontSize: 11.5, padding: "3px 0" }}>
               <span className="mono">{a.label}</span>

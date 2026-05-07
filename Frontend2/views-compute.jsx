@@ -1,14 +1,14 @@
 // Lightning-style GPU Compute view
 
 const GPUS = [
-  { id: "h100-sxm", name: "H100 SXM", vram: "80 GB HBM3", tflops: "3958 FP16", gen: "Hopper", tier: "flagship", priceHr: 4.89 },
-  { id: "h100-pcie", name: "H100 PCIe", vram: "80 GB HBM2e", tflops: "2000 FP16", gen: "Hopper", tier: "flagship", priceHr: 3.49 },
-  { id: "a100-80", name: "A100 80 GB", vram: "80 GB HBM2e", tflops: "1248 FP16", gen: "Ampere", tier: "pro", priceHr: 2.21 },
-  { id: "a100-40", name: "A100 40 GB", vram: "40 GB HBM2", tflops: "624 FP16", gen: "Ampere", tier: "pro", priceHr: 1.49 },
-  { id: "l40s", name: "L40S", vram: "48 GB GDDR6", tflops: "733 FP16", gen: "Ada Lovelace", tier: "pro", priceHr: 1.89 },
-  { id: "rtx4090", name: "RTX 4090", vram: "24 GB GDDR6X", tflops: "330 FP16", gen: "Ada Lovelace", tier: "standard", priceHr: 0.79 },
-  { id: "a10g", name: "A10G", vram: "24 GB GDDR6", tflops: "250 FP16", gen: "Ampere", tier: "standard", priceHr: 0.59 },
-  { id: "t4", name: "Tesla T4", vram: "16 GB GDDR6", tflops: "130 FP16", gen: "Turing", tier: "entry", priceHr: 0.29 },
+  { id: "mi300x", name: "MI300X", vram: "192 GB HBM3", tflops: "10496 FP16", gen: "CDNA 3", tier: "flagship", priceHr: 4.89 },
+  { id: "mi300a", name: "MI300A", vram: "128 GB HBM3", tflops: "3800 FP16", gen: "CDNA 3", tier: "flagship", priceHr: 3.49 },
+  { id: "mi250x-128", name: "MI250X 128 GB", vram: "128 GB HBM2e", tflops: "383 FP16", gen: "CDNA 2", tier: "pro", priceHr: 2.21 },
+  { id: "mi210-64", name: "MI210 64 GB", vram: "64 GB HBM2e", tflops: "181 FP16", gen: "CDNA 2", tier: "pro", priceHr: 1.49 },
+  { id: "v620", name: "Radeon PRO V620", vram: "32 GB GDDR6", tflops: "105 FP16", gen: "RDNA 2", tier: "pro", priceHr: 1.89 },
+  { id: "w7900", name: "Radeon PRO W7900", vram: "48 GB GDDR6", tflops: "123 FP16", gen: "RDNA 3", tier: "standard", priceHr: 0.79 },
+  { id: "w7800", name: "Radeon PRO W7800", vram: "32 GB GDDR6", tflops: "89 FP16", gen: "RDNA 3", tier: "standard", priceHr: 0.59 },
+  { id: "v520", name: "Radeon PRO V520", vram: "8 GB HBM2", tflops: "18 FP16", gen: "RDNA", tier: "entry", priceHr: 0.29 },
 ];
 
 const REGIONS = [
@@ -32,10 +32,10 @@ const INSTANCE_SIZES = [
 ];
 
 const MOCK_JOBS = [
-  { id: "job-9af2", name: "llama3-finetune-v4", gpu: "A100 80 GB", gpuCount: 4, status: "running", started: "2h 14m", cost: 13.19, region: "US East", progress: 62 },
-  { id: "job-3bc1", name: "stable-diffusion-xl-eval", gpu: "RTX 4090", gpuCount: 1, status: "running", started: "41m", cost: 0.54, region: "Dallas TX", progress: 38 },
-  { id: "job-c77e", name: "embedding-batch-1M", gpu: "A10G", gpuCount: 2, status: "done", started: "5h ago", cost: 5.90, region: "US West", progress: 100 },
-  { id: "job-12d0", name: "whisper-large-bench", gpu: "T4", gpuCount: 1, status: "queued", started: "—", cost: 0, region: "EU West", progress: 0 },
+  { id: "job-9af2", name: "llama3-finetune-v4", gpu: "MI250X 128 GB", gpuCount: 4, status: "running", started: "2h 14m", cost: 13.19, region: "US East", progress: 62 },
+  { id: "job-3bc1", name: "stable-diffusion-xl-eval", gpu: "Radeon PRO W7900", gpuCount: 1, status: "running", started: "41m", cost: 0.54, region: "Dallas TX", progress: 38 },
+  { id: "job-c77e", name: "embedding-batch-1M", gpu: "Radeon PRO W7800", gpuCount: 2, status: "done", started: "5h ago", cost: 5.90, region: "US West", progress: 100 },
+  { id: "job-12d0", name: "whisper-large-bench", gpu: "Radeon PRO V520", gpuCount: 1, status: "queued", started: "—", cost: 0, region: "EU West", progress: 0 },
 ];
 
 const TIER_COLORS = {
@@ -57,7 +57,7 @@ const STATUS_META = {
 
 const ComputeView = () => {
   const [tab, setTab] = React.useState("launch");
-  const [selectedGpu, setSelectedGpu]         = React.useState("a100-80");
+  const [selectedGpu, setSelectedGpu]         = React.useState("mi250x-128");
   const [selectedRegion, setSelectedRegion]   = React.useState("us-east-1");
   const [selectedSize, setSelectedSize]       = React.useState("1x");
   const [selectedFw, setSelectedFw]           = React.useState(FRAMEWORKS[0]);
@@ -329,9 +329,9 @@ const ComputeView = () => {
                 <div className="card" style={{ padding: 14 }}>
                   <div className="muted-2 mono" style={{ fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 10 }}>Cluster availability</div>
                   {[
-                    { label: "H100 SXM", avail: 2 },
-                    { label: "A100 80G", avail: 8 },
-                    { label: "RTX 4090", avail: 14 },
+                    { label: "MI300X", avail: 2 },
+                    { label: "MI250X 128G", avail: 8 },
+                    { label: "W7900", avail: 14 },
                   ].map(a => (
                     <div key={a.label} className="flex items-center justify-between" style={{ fontSize: 12, padding: "4px 0" }}>
                       <span className="mono">{a.label}</span>
@@ -408,14 +408,14 @@ const ComputeView = () => {
               <div className="card" style={{ padding: 16 }}>
                 <strong style={{ fontSize: 13, display: "block", marginBottom: 14 }}>GPU quota</strong>
                 {[
-                  { label: "H100 SXM", used: 0, total: 8 },
-                  { label: "H100 PCIe", used: 0, total: 8 },
-                  { label: "A100 80 GB", used: 4, total: 16 },
-                  { label: "A100 40 GB", used: 0, total: 16 },
-                  { label: "L40S", used: 0, total: 16 },
-                  { label: "RTX 4090", used: 1, total: 32 },
-                  { label: "A10G", used: 2, total: 32 },
-                  { label: "T4", used: 0, total: 64 },
+                  { label: "MI300X", used: 0, total: 8 },
+                  { label: "MI300A", used: 0, total: 8 },
+                  { label: "MI250X 128 GB", used: 4, total: 16 },
+                  { label: "MI210 64 GB", used: 0, total: 16 },
+                  { label: "Radeon PRO V620", used: 0, total: 16 },
+                  { label: "Radeon PRO W7900", used: 1, total: 32 },
+                  { label: "Radeon PRO W7800", used: 2, total: 32 },
+                  { label: "Radeon PRO V520", used: 0, total: 64 },
                 ].map(q => (
                   <div key={q.label} style={{ padding: "8px 0", borderBottom: "1px solid var(--border-subtle)" }}>
                     <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
@@ -463,7 +463,7 @@ const ComputeView = () => {
                   <div className="divider" />
                   {[
                     "Priority queue access",
-                    "Up to 8× H100 per job",
+                    "Up to 8× MI300X per job",
                     "Spot instance discounts",
                     "24/7 cluster support",
                   ].map((f, i) => (
