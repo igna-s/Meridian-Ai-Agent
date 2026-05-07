@@ -101,13 +101,20 @@ const ModalShell = ({ title, subtitle, onClose, children, footer, width = 480 })
 
 const NewIssueModal = ({ prefill, onClose }) => {
   const [title, setTitle] = React.useState(prefill.title || "");
-  const [priority, setPriority] = React.useState(prefill.priority || "medium");
+  const [description, setDescription] = React.useState("");
+  const [priority, setPriority] = React.useState(prefill.priority || "med");
   const [project, setProject] = React.useState(prefill.project || PROJECTS[0].id);
-  const submit = () => {
+  const submit = async () => {
     if (!title.trim()) { window.toast("Add a title first"); return; }
     const proj = PROJECTS.find(p => p.id === project);
-    window.toast(`Created issue in ${proj.code}`);
-    onClose();
+    try {
+      await window.apiFetch('POST', '/api/issues', { title: title.trim(), description: description.trim(), priority, project, status: prefill.status || 'backlog' });
+      window.meridianRefresh();
+      window.toast(`Created issue in ${proj.code}`);
+      onClose();
+    } catch (e) {
+      window.toast("Failed to create issue");
+    }
   };
   return (
     <ModalShell title="New issue" subtitle="⌘↵ to create · ESC to dismiss" onClose={onClose} width={560}
@@ -118,7 +125,7 @@ const NewIssueModal = ({ prefill, onClose }) => {
       <input autoFocus placeholder="Issue title" value={title} onChange={e => setTitle(e.target.value)}
         onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submit(); }}
         style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: 18, padding: "4px 2px", color: "var(--fg-0)", marginBottom: 10 }} />
-      <textarea placeholder="Add description… (optional)" rows={4} style={{
+      <textarea placeholder="Add description… (optional)" rows={4} value={description} onChange={e => setDescription(e.target.value)} style={{
         width: "100%", background: "var(--bg-0)", border: "1px solid var(--border)",
         outline: "none", borderRadius: 8, padding: 10, fontSize: 13, color: "var(--fg-0)",
         fontFamily: "inherit", resize: "vertical", marginBottom: 14
@@ -128,7 +135,7 @@ const NewIssueModal = ({ prefill, onClose }) => {
           {PROJECTS.map(p => <option key={p.id} value={p.id}>{p.code} — {p.name}</option>)}
         </select>
         <select value={priority} onChange={e => setPriority(e.target.value)} className="btn ghost sm">
-          {["urgent","high","medium","low","none"].map(p => <option key={p} value={p}>{p}</option>)}
+          {[["urgent","Urgent"],["high","High"],["med","Medium"],["low","Low"],["none","None"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
         </select>
         <button className="btn ghost sm"><Icon name="at" size={12} /> Assignee</button>
         <button className="btn ghost sm"><Icon name="calendar" size={12} /> Due date</button>
@@ -139,10 +146,16 @@ const NewIssueModal = ({ prefill, onClose }) => {
 
 const NewDocModal = ({ onClose }) => {
   const [title, setTitle] = React.useState("");
-  const submit = () => {
+  const submit = async () => {
     if (!title.trim()) { window.toast("Add a title"); return; }
-    window.toast(`Draft created · ${title}`);
-    onClose();
+    try {
+      await window.apiFetch('POST', '/api/docs', { title: title.trim() });
+      window.meridianRefresh();
+      window.toast(`Draft created · ${title}`);
+      onClose();
+    } catch (e) {
+      window.toast("Failed to create doc");
+    }
   };
   return (
     <ModalShell title="New document" onClose={onClose} width={520}
@@ -160,10 +173,16 @@ const NewDocModal = ({ onClose }) => {
 const NewPRModal = ({ onClose }) => {
   const [title, setTitle] = React.useState("");
   const [branch, setBranch] = React.useState("");
-  const submit = () => {
+  const submit = async () => {
     if (!title || !branch) { window.toast("Title and branch required"); return; }
-    window.toast(`Opened PR · ${branch} → main`);
-    onClose();
+    try {
+      await window.apiFetch('POST', '/api/prs', { title, branch, base: 'main', status: 'open' });
+      window.meridianRefresh();
+      window.toast(`Opened PR · ${branch} → main`);
+      onClose();
+    } catch (e) {
+      window.toast("Failed to open PR");
+    }
   };
   return (
     <ModalShell title="Open pull request" onClose={onClose} width={560}

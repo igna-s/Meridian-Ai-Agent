@@ -10,6 +10,8 @@ const Sidebar = ({ view, setView, collapsed }) => {
     { id: "docs",     label: "Docs",       icon: "docs" },
     { id: "chat",     label: "VaultMind AI", icon: "sparkle" },
     { id: "code",     label: "Code Editor",  icon: "code" },
+    { id: "compute",  label: "Compute",      icon: "sprint" },
+    { id: "aimarket", label: "AI Infrastructure", icon: "bolt" },
     { id: "prs",      label: "Pull requests", icon: "pr" },
     { id: "team",     label: "Team",       icon: "team" },
     { id: "settings", label: "Settings",   icon: "settings" },
@@ -89,6 +91,8 @@ const Topbar = ({ view, onToggleSidebar, onOpenPalette, onOpenInbox, onOpenTweak
     team: ["Team", "Members"],
     issue: ["Projects", "Aurora", "AUR-412"],
     chat: ["VaultMind AI", "Chat"],
+    compute:  ["Compute", "GPU Instances"],
+    aimarket: ["AI Infrastructure", "Studios & Models"],
     settings: ["Settings", "Workspace"],
   }[view] || ["Home"];
 

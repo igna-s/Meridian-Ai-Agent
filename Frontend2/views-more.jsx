@@ -27,6 +27,7 @@ const SprintsView = ({ setView, setIssueId }) => {
         <div className="topbar-spacer" />
         <button className="btn ghost sm" onClick={() => window.openSprintReport()}><Icon name="download" size={13} /> Report</button>
         <button className="btn ghost sm" onClick={() => window.openRetro()}><Icon name="sparkle" size={13} /> Retrospective draft</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("Summarize Iteration 42 progress")}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm" onClick={() => { if(confirm("Complete iteration 42? 22pts will move to backlog.")) window.toast("Iteration 42 closed"); }}>Complete iteration</button>
       </div>
 
@@ -181,14 +182,23 @@ const SprintsView = ({ setView, setIssueId }) => {
 // ==== PULL REQUESTS ====
 const PRsView = () => {
   const [filter, setFilter] = React.useState("all");
-  const list = PRS.filter(pr => filter === "all" || pr.status === filter);
+  const [prs, setPrs] = React.useState(PRS);
+
+  React.useEffect(() => {
+    const load = () => window.apiFetch('GET', '/api/prs').then(setPrs).catch(() => setPrs([...PRS]));
+    load();
+    document.addEventListener('meridian:refresh', load);
+    return () => document.removeEventListener('meridian:refresh', load);
+  }, []);
+
+  const list = prs.filter(pr => filter === "all" || pr.status === filter);
   return (
     <div className="flex col flex-1" style={{ minWidth: 0 }}>
       <div className="page-header">
         <div className="page-title">
           <Icon name="pr" size={15} />
           <span>Pull requests</span>
-          <span className="chip mono">{PRS.length}</span>
+          <span className="chip mono">{prs.length}</span>
         </div>
         <div className="topbar-spacer" />
         <div className="segmented">
@@ -203,6 +213,7 @@ const PRsView = () => {
           ))}
         </div>
         <button className="btn ghost sm" onClick={() => window.openFilter("pull requests")}><Icon name="filter" size={13} /> Filter</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("What's the status of open pull requests?")}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openNewPR()}><Icon name="plus" size={13} /> New PR</button>
       </div>
 
@@ -266,6 +277,7 @@ const TeamView = () => {
           <Icon name="search" size={12} />
           <input placeholder="Find a teammate…" />
         </div>
+        <button className="btn ghost sm" onClick={() => window.openAI("Who has the highest workload this sprint?")}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openInvite()}><Icon name="plus" size={13} /> Invite</button>
       </div>
 

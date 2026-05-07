@@ -19,6 +19,7 @@
 
   <script type="text/babel" src="icons.jsx"></script>
   <script type="text/babel" src="data.jsx"></script>
+  <script src="mock-api.jsx"></script>
   <script type="text/babel" src="api-client.jsx"></script>
   <script type="text/babel" src="interactions.jsx"></script>
   <script type="text/babel" src="detail-modals.jsx"></script>
@@ -29,6 +30,8 @@
   <script type="text/babel" src="views-settings.jsx"></script>
   <script type="text/babel" src="views-chat.jsx"></script>
   <script type="text/babel" src="views-code.jsx"></script>
+  <script type="text/babel" src="views-compute.jsx"></script>
+  <script type="text/babel" src="views-ai-marketplace.jsx"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -114,6 +117,25 @@
           if (!e.data || typeof e.data !== "object") return;
           if (e.data.type === "__activate_edit_mode") setTweaksOpen(true);
           if (e.data.type === "__deactivate_edit_mode") setTweaksOpen(false);
+          if (e.data.type === "meridian:vscode-commit") {
+            const { fileName, commitMessage, branch, additions } = e.data;
+            const prId = `AUR-${Math.floor(700 + Math.random() * 100)}`;
+            PRS.unshift({
+              id: prId, title: `feat: add ${fileName} via AI codegen`, status: "open",
+              author: "you", branch: branch || "feat/ai-generated",
+              project: "Aurora", additions: additions || 0, deletions: 0,
+              checks: "passing", reviewers: [], comments: 0, draft: false,
+              updatedAt: "just now",
+            });
+            INBOX.unshift({
+              id: `inbox-${Date.now()}`, type: "pr", unread: true,
+              title: `Your PR is open: feat: add ${fileName} via AI codegen`,
+              body: commitMessage || "AI-generated code committed and pushed.",
+              time: "just now", actor: "you",
+            });
+            window.toast(`PR created: feat: add ${fileName} via AI codegen`);
+            window.meridianRefresh && window.meridianRefresh();
+          }
         };
         window.addEventListener("message", onMsg);
         window.parent.postMessage({ type: "__edit_mode_available" }, "*");
@@ -143,6 +165,8 @@
           case "settings": return <SettingsView settings={settings} setSettings={setSettingsPersist} />;
           case "chat":    return <ChatView />;
           case "code":    return <CodeEditorView />;
+          case "compute":  return <ComputeView />;
+          case "aimarket": return <AIMarketplaceView />;
           default:        return <HomeView setView={setView} setIssueId={setIssueId} />;
         }
       };

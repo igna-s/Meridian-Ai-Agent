@@ -60,15 +60,17 @@ const ChatView = () => {
   const [input, setInput] = React.useState('');
   const [isTyping, setIsTyping] = React.useState(false);
   const [activeSession, setActiveSession] = React.useState(null);
-  
+
   const scrollRef = React.useRef(null);
   const token = localStorage.getItem('meridian-token');
 
   // Check for initial query if coming from Command Palette
   React.useEffect(() => {
     if (window.chatInitialQuery) {
-      setInput(window.chatInitialQuery);
+      const q = window.chatInitialQuery;
       window.chatInitialQuery = null;
+      // Small delay so the view is mounted
+      setTimeout(() => sendMessage(q), 50);
     }
   }, []);
 
@@ -78,94 +80,87 @@ const ChatView = () => {
     }
   }, [messages, isTyping]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  const sendMessage = async (text) => {
+    if (!text || !text.trim()) return;
+    if (isTyping) return;
 
-    const userMsg = { id: Date.now(), text: input, sender: 'user', timestamp: new Date() };
+    const userMsg = { id: Date.now(), text, sender: 'user', timestamp: new Date() };
     setMessages(prev => [...prev, userMsg]);
-    setInput('');
     setIsTyping(true);
     const typingId = Date.now() + 1;
 
+    const thinkingMsg = { id: typingId, text: '', sender: 'ai', timestamp: new Date(), status: 'Thinking...', steps: [] };
+    setMessages(prev => [...prev, thinkingMsg]);
+
+    // Animate reasoning steps while waiting for the response
+    const liveSteps = [
+      'Parsing query...',
+      'Searching issues and PRs...',
+      'Cross-referencing sprint data...',
+      'Analyzing team and roadmap...',
+      'Composing response...',
+    ];
+    let stepIdx = 0;
+    const stepTimer = setInterval(() => {
+      if (stepIdx < liveSteps.length) {
+        const step = liveSteps[stepIdx++];
+        setMessages(prev => prev.map(msg =>
+          msg.id === typingId ? { ...msg, steps: [...(msg.steps || []), step] } : msg
+        ));
+      } else {
+        clearInterval(stepTimer);
+      }
+    }, 320);
+
     try {
-      const response = await fetch('https://banking-rag-auth-api.azurewebsites.net/chat', {
+      const history = messages.slice(-10).map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      })).filter(m => m.content);
+
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          query: userMsg.text,
-          session_id: activeSession
+          query: text,
+          history
         })
       });
 
+      clearInterval(stepTimer);
       if (!response.ok) throw new Error('Network response was not ok');
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let aiMsg = { id: typingId, text: '', sender: 'ai', timestamp: new Date(), status: 'Starting...', steps: [] };
-      setMessages(prev => [...prev, aiMsg]);
+      const data = await response.json();
+      const finalSteps = data.reasoning_data?.steps || liveSteps;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (!line.trim()) continue;
-          try {
-            const data = JSON.parse(line);
-
-            if (data.type === 'status') {
-              setMessages(prev => prev.map(msg => {
-                if (msg.id === typingId) {
-                  const newSteps = [...(msg.steps || []), data.content];
-                  return { ...msg, status: data.content, steps: newSteps };
-                }
-                return msg;
-              }));
-            } else if (data.type === 'answer') {
-              setMessages(prev => prev.map(msg =>
-                msg.id === typingId ? {
-                  ...msg,
-                  text: data.response,
-                  status: null,
-                  steps: data.reasoning_data?.steps || msg.steps || []
-                } : msg
-              ));
-              if (!activeSession && data.session_id) {
-                setActiveSession(data.session_id);
-              }
-            } else if (data.type === 'error') {
-              const safeError = 'Hubo un problema al procesar tu solicitud.';
-              setMessages(prev => prev.map(msg =>
-                msg.id === typingId ? { ...msg, text: safeError, status: null } : msg
-              ));
-            }
-          } catch (e) {
-            console.error("JSON Parse Error", e);
-          }
-        }
-      }
+      setMessages(prev => prev.map(msg =>
+        msg.id === typingId ? {
+          ...msg,
+          text: data.response || 'No response received.',
+          status: null,
+          steps: finalSteps
+        } : msg
+      ));
     } catch (error) {
+      clearInterval(stepTimer);
       console.error("Chat Error:", error);
-      const errorMsg = {
-        id: Date.now() + 2,
-        text: 'Lo siento, hubo un error de conexión.',
-        sender: 'ai',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => prev.map(msg =>
+        msg.id === typingId ? { ...msg, text: 'Connection error — please try again.', status: null } : msg
+      ));
     } finally {
       setIsTyping(false);
-      setMessages(prev => prev.map(msg =>
-        msg.id === typingId && msg.status ? { ...msg, status: null } : msg
-      ));
     }
+  };
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    const text = input;
+    setInput('');
+    sendMessage(text);
   };
 
   const renderMarkdown = (text) => {
@@ -179,6 +174,7 @@ const ChatView = () => {
         <div className="page-title">
           <Icon name="sparkle" size={16} style={{ color: 'var(--accent)' }} />
           <span>VaultMind AI</span>
+          <span className="chip mono" style={{ fontSize: 10, padding: '2px 7px', color: 'var(--amber)', borderColor: 'var(--amber)', opacity: 0.8 }}>demo</span>
         </div>
         <div className="topbar-spacer" />
         <button className="btn sm ghost" onClick={() => { setMessages([]); setActiveSession(null); }}>
@@ -189,10 +185,28 @@ const ChatView = () => {
       <div className="scroll-y flex col flex-1" ref={scrollRef} style={{ padding: "24px 28px" }}>
         <div style={{ maxWidth: 800, margin: "0 auto", width: '100%', display: 'flex', flexDirection: 'column', gap: 24 }}>
           {messages.length === 0 ? (
-            <div style={{ textAlign: 'center', marginTop: 100, color: 'var(--fg-3)' }}>
-              <Icon name="sparkle" size={32} style={{ opacity: 0.5, marginBottom: 16, display: 'inline-block' }} />
-              <div style={{ fontSize: 16, fontWeight: 500, color: 'var(--fg-1)' }}>How can I help you today?</div>
-              <div style={{ fontSize: 13, marginTop: 8 }}>Ask me about your projects, issues, or code.</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 60 }}>
+              <Icon name="sparkle" size={32} style={{ opacity: 0.5, marginBottom: 16, color: 'var(--accent)' }} />
+              <div style={{ fontSize: 18, fontWeight: 500, color: 'var(--fg-0)', marginBottom: 6 }}>How can I help you today?</div>
+              <div style={{ fontSize: 13, color: 'var(--fg-3)', marginBottom: 32 }}>Ask me about your projects, issues, PRs, or team.</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%' }}>
+                {[
+                  { icon: 'sprint',   text: "What's the status of Iteration 42?" },
+                  { icon: 'issues',   text: "What's blocking the team right now?" },
+                  { icon: 'pr',       text: "Which PRs need attention?" },
+                  { icon: 'team',     text: "Who has capacity for new work?" },
+                  { icon: 'roadmap',  text: "Which milestones are at risk this quarter?" },
+                  { icon: 'sparkle',  text: "Give me today's standup brief" },
+                ].map((p, i) => (
+                  <button key={i} onClick={() => { if (!isTyping) sendMessage(p.text); }}
+                    style={{ textAlign: 'left', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-1)', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'var(--fg-1)', transition: 'border-color 0.15s' }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--accent-dim)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+                    <Icon name={p.icon} size={14} style={{ color: 'var(--fg-3)', marginTop: 1, flexShrink: 0 }} />
+                    <span>{p.text}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             messages.map((msg) => (
@@ -201,16 +215,16 @@ const ChatView = () => {
                   {msg.sender === 'user' ? <Icon name="team" size={16} style={{ color: '#000' }} /> : <Icon name="sparkle" size={16} style={{ color: 'var(--accent)' }} />}
                 </div>
                 <div style={{ maxWidth: '80%', padding: '12px 16px', borderRadius: 12, background: msg.sender === 'user' ? 'var(--accent-dim)' : 'var(--bg-1)', border: msg.sender === 'user' ? 'none' : '1px solid var(--border)', borderTopRightRadius: msg.sender === 'user' ? 2 : 12, borderTopLeftRadius: msg.sender === 'user' ? 12 : 2 }}>
-                  
+
                   {(msg.steps?.length > 0 || msg.status) && (
                     <ReasoningSteps steps={msg.steps || []} status={msg.status} />
                   )}
 
                   {!msg.status && msg.text && (
-                    <div 
-                      className="markdown-body" 
+                    <div
+                      className="markdown-body"
                       style={{ fontSize: 14, lineHeight: 1.5, color: msg.sender === 'user' ? 'var(--fg-0)' : 'var(--fg-1)' }}
-                      dangerouslySetInnerHTML={renderMarkdown(msg.text)} 
+                      dangerouslySetInnerHTML={renderMarkdown(msg.text)}
                     />
                   )}
                 </div>

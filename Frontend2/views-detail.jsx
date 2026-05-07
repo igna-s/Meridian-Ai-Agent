@@ -2,10 +2,17 @@
 
 // ==== ISSUE DETAIL ====
 const IssueDetail = ({ issueId, setView }) => {
-  const issue = ISSUES.find(i => i.id === issueId) || ISSUES[0];
+  const [issue, setIssue] = React.useState(ISSUES.find(i => i.id === issueId) || ISSUES[0]);
   const proj = PROJECTS.find(p => p.id === issue.project);
   const assignees = issue.assignees.map(id => PEOPLE.find(p => p.id === id));
   const [activeTab, setActiveTab] = React.useState("comments");
+
+  React.useEffect(() => {
+    const load = () => window.apiFetch('GET', `/api/issues/${issueId}`).then(setIssue).catch(() => {});
+    load();
+    document.addEventListener('meridian:refresh', load);
+    return () => document.removeEventListener('meridian:refresh', load);
+  }, [issueId]);
 
   const activity = [
     { type: "create", user: "u1", time: "Apr 02", text: "opened this issue" },
@@ -188,18 +195,18 @@ compositing  0.8ms  ← budget OK
           <div className="flex items-center gap-8" onClick={() => window.openPicker({ title: "Status", options: [
             { value: "backlog", label: "Backlog" },{ value: "todo", label: "Todo" },
             { value: "progress", label: "In progress" },{ value: "review", label: "In review" },{ value: "done", label: "Done" },
-          ], onChoose: (o) => window.toast(`Status → ${o.label}`) })} style={{ cursor: "pointer", padding: "6px 8px", borderRadius: 6, background: "var(--bg-1)", border: "1px solid var(--border)" }}>
-            <span className="status progress"><span className="s-dot" /></span>
-            <span style={{ fontSize: 12.5 }}>In progress</span>
+          ], onChoose: (o) => window.apiFetch('PATCH', `/api/issues/${issue.id}`, { status: o.value }).then(setIssue).catch(() => window.toast("Update failed")) })} style={{ cursor: "pointer", padding: "6px 8px", borderRadius: 6, background: "var(--bg-1)", border: "1px solid var(--border)" }}>
+            <span className={`status ${issue.status === 'backlog' ? 'todo' : issue.status}`}><span className="s-dot" /></span>
+            <span style={{ fontSize: 12.5 }}>{STATUS_META[issue.status]?.label || issue.status}</span>
             <Icon name="chevron-down" size={12} style={{ marginLeft: "auto", color: "var(--fg-3)" }} />
           </div>
         </Section>
         <Section title="Priority">
           <div className="flex items-center gap-8" onClick={() => window.openPicker({ title: "Priority", options: [
-            { value: "urgent", label: "Urgent" },{ value: "high", label: "High" },{ value: "medium", label: "Medium" },{ value: "low", label: "Low" },{ value: "none", label: "No priority" },
-          ], onChoose: (o) => window.toast(`Priority → ${o.label}`) })} style={{ cursor: "pointer", padding: "6px 8px", borderRadius: 6, background: "var(--bg-1)", border: "1px solid var(--border)" }}>
-            <PriorityGlyph level="urgent" />
-            <span style={{ fontSize: 12.5, color: "var(--rose)" }}>Urgent</span>
+            { value: "urgent", label: "Urgent" },{ value: "high", label: "High" },{ value: "med", label: "Medium" },{ value: "low", label: "Low" },{ value: "none", label: "No priority" },
+          ], onChoose: (o) => window.apiFetch('PATCH', `/api/issues/${issue.id}`, { priority: o.value }).then(setIssue).catch(() => window.toast("Update failed")) })} style={{ cursor: "pointer", padding: "6px 8px", borderRadius: 6, background: "var(--bg-1)", border: "1px solid var(--border)" }}>
+            <PriorityGlyph level={issue.priority} />
+            <span style={{ fontSize: 12.5 }}>{issue.priority === 'med' ? 'Medium' : issue.priority?.charAt(0).toUpperCase() + issue.priority?.slice(1)}</span>
             <Icon name="chevron-down" size={12} style={{ marginLeft: "auto", color: "var(--fg-3)" }} />
           </div>
         </Section>
@@ -212,7 +219,7 @@ compositing  0.8ms  ← budget OK
                 <span className="mono muted-2" style={{ marginLeft: "auto", fontSize: 10.5 }}>@{a.handle}</span>
               </div>
             ))}
-            <button className="btn ghost sm" style={{ justifyContent: "flex-start", marginTop: 2 }} onClick={() => window.openPicker({ title: "Assign teammate", options: PEOPLE.map(u => ({ value: u.id, label: u.name, hint: `@${u.handle}` })), onChoose: (o) => window.toast(`Assigned ${o.label}`) })}><Icon name="plus" size={12} /> Add</button>
+            <button className="btn ghost sm" style={{ justifyContent: "flex-start", marginTop: 2 }} onClick={() => window.openPicker({ title: "Assign teammate", options: PEOPLE.map(u => ({ value: u.id, label: u.name, hint: `@${u.handle}` })), onChoose: (o) => window.apiFetch('PATCH', `/api/issues/${issue.id}`, { assignees: [...issue.assignees, o.value] }).then(setIssue).catch(() => window.toast("Update failed")) })}><Icon name="plus" size={12} /> Add</button>
           </div>
         </Section>
         <Section title="Project">
@@ -235,7 +242,7 @@ compositing  0.8ms  ← budget OK
               const lab = LABELS.find(l => l.id === lid);
               return <span key={lid} className="tag" style={{ color: lab.color }}>#{lab.name}</span>;
             })}
-            <button className="tag muted-2" onClick={() => window.openPicker({ title: "Add label", options: LABELS.map(l => ({ value: l.id, label: `#${l.name}`, swatch: l.color })), onChoose: (o) => window.toast(`Added ${o.label}`) })}><Icon name="plus" size={10} /></button>
+            <button className="tag muted-2" onClick={() => window.openPicker({ title: "Add label", options: LABELS.map(l => ({ value: l.id, label: `#${l.name}`, swatch: l.color })), onChoose: (o) => window.apiFetch('PATCH', `/api/issues/${issue.id}`, { labels: [...issue.labels, o.value] }).then(setIssue).catch(() => window.toast("Update failed")) })}><Icon name="plus" size={10} /></button>
           </div>
         </Section>
         <Section title="Estimate">
@@ -293,6 +300,14 @@ const Section = ({ title, children }) => (
 const DocsView = () => {
   const [selected, setSelected] = React.useState("d3");
   const [expanded, setExpanded] = React.useState(new Set(["d1","d2","d6","d10"]));
+  const [docs, setDocs] = React.useState(DOCS);
+
+  React.useEffect(() => {
+    const load = () => window.apiFetch('GET', '/api/docs').then(setDocs).catch(() => {});
+    load();
+    document.addEventListener('meridian:refresh', load);
+    return () => document.removeEventListener('meridian:refresh', load);
+  }, []);
 
   const toggle = (id) => {
     setExpanded(prev => {
@@ -331,7 +346,7 @@ const DocsView = () => {
           </div>
         </div>
         <div style={{ padding: "6px 4px 24px" }}>
-          {renderTree(DOCS)}
+          {renderTree(docs)}
         </div>
       </aside>
       <div className="flex col flex-1" style={{ minWidth: 0 }}>
@@ -447,6 +462,7 @@ const RoadmapView = () => {
           <button onClick={() => window.openPicker({ title: "Milestones", options: [{ value: "m1", label: "Aurora launch · Jun 12" }, { value: "m2", label: "SSO audit · Jul 1" }, { value: "m3", label: "Tessera 2.0 · Aug 22" }], onChoose: (o) => window.toast(o.label) })}>Milestones</button>
         </div>
         <button className="btn ghost sm" onClick={() => window.openPicker({ title: "Filter projects", options: PROJECTS.map(p => ({ value: p.id, label: p.name, swatch: p.color })), onChoose: (o) => window.toast(`Filtered to ${o.label}`) })}><Icon name="filter" size={13} /> Projects: all</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("What milestones are at risk this quarter?")}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openNewIssue({ kind: "initiative" })}><Icon name="plus" size={13} /> New initiative</button>
       </div>
 

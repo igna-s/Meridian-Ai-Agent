@@ -314,6 +314,14 @@ const HomeDetailed = ({ setView, setIssueId }) => {
 const IssuesView = ({ setView, setIssueId, cardStyle }) => {
   const [mode, setMode] = React.useState("board");
   const [grouping, setGrouping] = React.useState("status");
+  const [issues, setIssues] = React.useState(ISSUES);
+
+  React.useEffect(() => {
+    const load = () => window.apiFetch('GET', '/api/issues').then(setIssues).catch(() => {});
+    load();
+    document.addEventListener('meridian:refresh', load);
+    return () => document.removeEventListener('meridian:refresh', load);
+  }, []);
 
   return (
     <div className="flex col flex-1" style={{ minWidth: 0 }}>
@@ -322,7 +330,7 @@ const IssuesView = ({ setView, setIssueId, cardStyle }) => {
           <span className="eyebrow">PROJECT / AURORA</span>
           <Icon name="chevron-right" size={12} style={{ color: "var(--fg-3)" }} />
           <span>Issues</span>
-          <span className="chip mono">{ISSUES.length}</span>
+          <span className="chip mono">{issues.length}</span>
         </div>
         <div className="topbar-spacer" />
         <button className="btn ghost sm" onClick={() => window.openFilter("issues")}><Icon name="filter" size={13} /> Filter</button>
@@ -343,17 +351,18 @@ const IssuesView = ({ setView, setIssueId, cardStyle }) => {
           <button className={mode === "list" ? "on" : ""} onClick={() => setMode("list")}><Icon name="list" size={13} /> List</button>
           <button className={mode === "timeline" ? "on" : ""} onClick={() => setMode("timeline")}><Icon name="timeline" size={13} /> Timeline</button>
         </div>
+        <button className="btn ghost sm" onClick={() => window.openAI("What are the top blocking issues right now?")}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openNewIssue()}><Icon name="plus" size={13} /> New issue</button>
       </div>
 
-      {mode === "board" && <KanbanBoard setView={setView} setIssueId={setIssueId} cardStyle={cardStyle} />}
-      {mode === "list" && <IssuesList setView={setView} setIssueId={setIssueId} />}
-      {mode === "timeline" && <IssuesTimeline />}
+      {mode === "board" && <KanbanBoard setView={setView} setIssueId={setIssueId} cardStyle={cardStyle} issues={issues} />}
+      {mode === "list" && <IssuesList setView={setView} setIssueId={setIssueId} issues={issues} />}
+      {mode === "timeline" && <IssuesTimeline issues={issues} />}
     </div>
   );
 };
 
-const KanbanBoard = ({ setView, setIssueId, cardStyle }) => {
+const KanbanBoard = ({ setView, setIssueId, cardStyle, issues }) => {
   const cols = [
     { key: "backlog", label: "Backlog" },
     { key: "todo", label: "Todo" },
@@ -365,7 +374,7 @@ const KanbanBoard = ({ setView, setIssueId, cardStyle }) => {
     <div className="scroll-y" style={{ flex: 1, padding: "12px 16px" }}>
       <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols.length}, minmax(260px, 1fr))`, gap: 12, minHeight: "100%" }}>
         {cols.map(col => {
-          const items = ISSUES.filter(i => i.status === col.key);
+          const items = issues.filter(i => i.status === col.key);
           const klass = col.key === "backlog" ? "todo" : col.key;
           return (
             <div key={col.key} style={{ minWidth: 0, display: "flex", flexDirection: "column" }}>
@@ -438,9 +447,9 @@ const KanbanCard = ({ issue, setView, setIssueId, minimal }) => {
   );
 };
 
-const IssuesList = ({ setView, setIssueId }) => {
+const IssuesList = ({ setView, setIssueId, issues }) => {
   const groups = {};
-  ISSUES.forEach(i => { (groups[i.status] ||= []).push(i); });
+  issues.forEach(i => { (groups[i.status] ||= []).push(i); });
 
   return (
     <div className="scroll-y" style={{ flex: 1 }}>
@@ -486,10 +495,10 @@ const IssuesList = ({ setView, setIssueId }) => {
   );
 };
 
-const IssuesTimeline = () => {
+const IssuesTimeline = ({ issues }) => {
   // Weeks Apr 7 – Jun 1 (8 weeks)
   const weeks = ["Apr 07","Apr 14","Apr 21","Apr 28","May 05","May 12","May 19","May 26"];
-  const items = ISSUES.filter(i => i.due).slice(0, 10).map((is, i) => ({
+  const items = issues.filter(i => i.due).slice(0, 10).map((is, i) => ({
     issue: is,
     startWeek: (i * 3) % 5,
     span: 1 + (i % 3),

@@ -414,6 +414,44 @@ const AIAnswerModal = ({ question, onClose }) => {
       ],
       sources: ["Iter 41 board", "#2298", "#2312"],
     },
+    "What are the top blocking issues right now?": {
+      tldr: "3 active blockers across Aurora and Tessera. SEC-12 is highest severity — audit deadline is firm.",
+      body: [
+        "**SEC-12** (Blocker) — SSO infra freeze pending Security eng review. Audit deadline Jun 1 is immovable. Escalation recommended today.",
+        "**AUR-401** (High) — Canvas hit-test regression under 10k nodes. Kenji identified root cause; fix in review. ETA: tomorrow.",
+        "**TSR-92** (Medium) — Tessera token sync failing on Windows CI. Intermittent; likely a path separator bug. Assigned to Priya.",
+      ],
+      sources: ["SEC-12", "AUR-401", "TSR-92", "Iter 42 board"],
+    },
+    "What's the status of open pull requests?": {
+      tldr: "7 open PRs: 2 ready to merge, 3 in review, 2 drafts. Oldest is 4 days stale.",
+      body: [
+        "**Ready to merge**: #2341 (token sync fix) and #2338 (CI timeout bump) — both approved, checks green.",
+        "**In review**: #2345 (canvas resize), #2347 (SSO middleware), #2349 (notifier service) — all awaiting 1 more approval.",
+        "**Drafts**: #2350 (Tessera dark mode), #2352 (perf dashboard) — not ready for review.",
+        "Recommend merging #2341 first — it unblocks Tessera iOS and Android nightly builds.",
+      ],
+      sources: ["#2341", "#2338", "#2345", "PR board"],
+    },
+    "Who has the highest workload this sprint?": {
+      tldr: "Kenji is over-allocated at 18pts assigned vs 12pt sprint capacity. Sara and Priya are on track.",
+      body: [
+        "**Kenji** (18pts / 12pt cap) — carrying AUR-412 canvas rebuild solo since Diego moved to security audit. Recommend pulling TSR-92 off his plate.",
+        "**Sara** (11pts) — on track. Leading design systems token migration; pairing with Kenji 2h/day this week.",
+        "**Priya** (9pts) — slightly under-allocated. Available to absorb TSR-92 (3pts) if Kenji needs relief.",
+        "**Diego** (8pts) — pulled into SEC-12 mid-sprint. His original 6pts of canvas work is now unassigned.",
+      ],
+      sources: ["Iter 42 board", "Team capacity", "AUR-412", "SEC-12"],
+    },
+    "What milestones are at risk this quarter?": {
+      tldr: "Aurora launch (Jun 12) is amber. SSO audit (Jul 1) is red. Tessera 2.0 (Aug 22) is green.",
+      body: [
+        "**Aurora launch Jun 12** (Amber) — canvas rebuild on track, but SEC-12 SSO blocker creates a 5-day slip risk if not resolved by May 15. Mitigation: ship without SSO, add in hotfix.",
+        "**SSO audit Jul 1** (Red) — Security eng review not started. Requires 3-week turnaround minimum. Must begin by Jun 9 to hit deadline. Escalate to VP Eng.",
+        "**Tessera 2.0 Aug 22** (Green) — token migration complete, dark mode in progress. 6-week buffer remaining.",
+      ],
+      sources: ["Roadmap Q2–Q3", "SEC-12", "AUR-412", "TSR-88"],
+    },
   };
   const a = answers[question] || { tldr: "Meridian AI is thinking…", body: [], sources: [] };
   return (
