@@ -48,11 +48,12 @@ const TIER_COLORS = {
 const CLOUD_BADGE = { aws: "AWS", coreweave: "CoreWeave", lambda: "Lambda" };
 const CLOUD_COLOR = { aws: "oklch(0.80 0.14 75)", coreweave: "oklch(0.78 0.13 220)", lambda: "oklch(0.72 0.18 300)" };
 
-const STATUS_META = {
+const COMPUTE_STATUS_META = {
+  queued: { label: "Queued", color: "var(--fg-3)" },
   running: { label: "Running", color: "var(--accent)" },
-  done:    { label: "Done",    color: "oklch(0.78 0.13 220)" },
-  queued:  { label: "Queued",  color: "var(--fg-3)" },
-  failed:  { label: "Failed",  color: "oklch(0.72 0.17 20)" },
+  done: { label: "Completed", color: "var(--status-done)" },
+  failed: { label: "Failed", color: "var(--rose)" },
+  canceled: { label: "Canceled", color: "var(--fg-3)" }
 };
 
 const ComputeView = () => {
@@ -381,7 +382,7 @@ const ComputeView = () => {
                   <span style={{ width: 70 }}></span>
                 </div>
                 {jobs.map(j => {
-                  const sm = STATUS_META[j.status] || STATUS_META.queued;
+                  const sm = COMPUTE_STATUS_META[j.status] || COMPUTE_STATUS_META.queued;
                   return (
                     <div key={j.id} className="row" style={{ display: "flex", alignItems: "center" }}>
                       <span className="mono muted-2" style={{ fontSize: 11, width: 130, flexShrink: 0 }}>{j.id}</span>
