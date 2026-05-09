@@ -667,7 +667,7 @@ const AIMarketplaceView = () => {
             "compute",
             { gpus: STUDIO_GPU_TABLE, models: LLM_MODELS.map(m=>({id:m.id,name:m.name,category:m.category,inputPrice:m.inputPrice,outputPrice:m.outputPrice})) }
           )}>
-          <Icon name="sparkle" size={13} /> Ask AI
+          <Icon name="sparkle" size={13} /> AI Summary
         </button>
       </div>
 

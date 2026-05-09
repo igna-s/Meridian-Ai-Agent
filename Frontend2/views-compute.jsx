@@ -124,7 +124,7 @@ const ComputeView = () => {
             "compute",
             { jobs, quota: QUOTA_DATA }
           )}>
-          <Icon name="sparkle" size={13} /> AI Analysis
+          <Icon name="sparkle" size={13} /> AI Summary
         </button>
       </div>
 

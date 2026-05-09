@@ -566,6 +566,10 @@ const NexusView = () => {
             transition: "color .15s, background .15s",
           }}>{t.label}</button>
         ))}
+        <div style={{ flex: 1 }} />
+        <button className="btn ghost sm" onClick={() => window.openAI("What are the best models available in Nexus for fast inference?", "compute", { models: NEXUS_MODELS })}>
+          <Icon name="sparkle" size={13} /> AI Summary
+        </button>
       </div>
 
       {/* Tab content */}

@@ -421,6 +421,7 @@ const InboxView = () => {
           <strong style={{ fontSize: 13 }}>Inbox</strong>
           <span className="chip mono">{INBOX.filter(n => n.unread).length}</span>
           <div style={{ flex: 1 }} />
+          <button className="btn ghost sm" onClick={() => window.openAI("Summarize my inbox notifications", "general", { inbox: INBOX })}><Icon name="sparkle" size={13} /> AI Summary</button>
           <div className="segmented">
             <button className="on">All</button>
             <button onClick={() => window.toast("Mentions only")}>Mentions</button>
