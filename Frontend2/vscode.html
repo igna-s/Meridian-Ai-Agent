@@ -457,6 +457,13 @@ const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const LS_FILES   = 'meridian-vscode-files';
 const LS_KEY     = 'meridian-groq-key';
 
+// Receive API key from parent Meridian app via postMessage
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'GROQ_KEY' && e.data?.key) {
+    localStorage.setItem(LS_KEY, e.data.key);
+  }
+});
+
 // ── State ──────────────────────────────────────────────────────────────
 const files   = {};      // { name: content }
 let openTabs  = [];      // ordered open file names

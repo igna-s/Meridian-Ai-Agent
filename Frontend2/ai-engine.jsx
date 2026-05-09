@@ -3,7 +3,7 @@
 // Each view passes a `role` so the system prompt is context-aware.
 
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL    = "llama-3.3-70b-versatile";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 // Key is stored centrally in localStorage under "meridian-groq-key", or injected via Azure CI/CD
 const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
@@ -135,7 +135,7 @@ async function groqChat({ role = "general", messages, contextData = null, onChun
           const data = JSON.parse(line.slice(6));
           const delta = data.choices?.[0]?.delta?.content || "";
           if (delta) { fullText += delta; onChunk(delta, fullText); }
-        } catch (_) {}
+        } catch (_) { }
       }
     }
     return fullText;
@@ -150,11 +150,11 @@ async function groqChat({ role = "general", messages, contextData = null, onChun
 const AIPanelContext = React.createContext(null);
 
 const AIPanelProvider = ({ children }) => {
-  const [open, setOpen]         = React.useState(false);
-  const [role, setRole]         = React.useState("general");
-  const [ctxData, setCtxData]   = React.useState(null);
+  const [open, setOpen] = React.useState(false);
+  const [role, setRole] = React.useState("general");
+  const [ctxData, setCtxData] = React.useState(null);
   const [messages, setMessages] = React.useState([]);
-  const [loading, setLoading]   = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [streamText, setStreamText] = React.useState("");
   const scrollRef = React.useRef(null);
 
@@ -177,8 +177,8 @@ const AIPanelProvider = ({ children }) => {
   }, [messages, streamText]);
 
   const sendAI = async (text, overrideRole, overrideData, prevMessages) => {
-    const r   = overrideRole  ?? role;
-    const ctx = overrideData  ?? ctxData;
+    const r = overrideRole ?? role;
+    const ctx = overrideData ?? ctxData;
     const hist = prevMessages ?? messages;
     if (!text.trim() || loading) return;
     setLoading(true);
@@ -337,10 +337,10 @@ const AIPanelProvider = ({ children }) => {
                 {streamText
                   ? <span dangerouslySetInnerHTML={{ __html: renderMd(streamText) }} />
                   : <span style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "pulse 1s ease-in-out infinite" }} />
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "pulse 1s ease-in-out 0.2s infinite" }} />
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "pulse 1s ease-in-out 0.4s infinite" }} />
-                    </span>}
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "pulse 1s ease-in-out infinite" }} />
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "pulse 1s ease-in-out 0.2s infinite" }} />
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: "pulse 1s ease-in-out 0.4s infinite" }} />
+                  </span>}
               </div>
             </div>
           )}
@@ -363,7 +363,7 @@ const AIPanelProvider = ({ children }) => {
   );
 };
 
-window.groqChat  = groqChat;
+window.groqChat = groqChat;
 window.getGroqKey = getGroqKey;
 window.setGroqKey = setGroqKey;
 window.AIPanelProvider = AIPanelProvider;
