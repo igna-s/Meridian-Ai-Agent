@@ -16,6 +16,10 @@ const getGroqKey = () => {
 };
 const setGroqKey = (k) => localStorage.setItem("meridian-groq-key", k.trim());
 
+// Expose globally so all views and iframes can access
+window.getGroqKey = getGroqKey;
+window.setGroqKey = setGroqKey;
+
 // ── System prompts per role ────────────────────────────────────────────────
 const ROLE_PROMPTS = {
   general: `You are VaultMind AI, the intelligent assistant embedded in Meridian — a modern project management platform for engineering teams. You have awareness of the team's issues, PRs, sprints, roadmap, docs, and compute jobs. Be concise, insightful, and proactive. Respond in plain text or markdown.`,

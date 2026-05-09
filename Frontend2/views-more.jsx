@@ -197,7 +197,7 @@ const PRsView = () => {
   const list = prs.filter(pr => filter === "all" || pr.status === filter);
 
   const runPRAnalysis = async () => {
-    const key = localStorage.getItem('meridian-groq-key') || '';
+    const key = (window.getGroqKey ? window.getGroqKey() : localStorage.getItem('meridian-groq-key')) || '';
     if (!key) { window.openAI("Analyze all open pull requests", "pr", { prs: list }); return; }
     setAiOpen(true); setAiText(""); setAiLoading(true);
 
