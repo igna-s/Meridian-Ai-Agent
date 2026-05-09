@@ -1,4 +1,4 @@
-// Nexus — Cloud AI Platform (Lightning AI-inspired, Meridian identity)
+// Nexus — Cloud AI Platform (Meridian identity)
 
 const NEXUS_MODELS = [
   { id: "nexacore-72b",   name: "NexaCore-72B",        org: "VaultMind",   orgColor: "#a78bfa", badges: ["LLM","FLAGSHIP"], grad: ["#3b1f6e","#1e0e3a"], input: 8.00,  output: 24.00, ctx: "200k", new: false },

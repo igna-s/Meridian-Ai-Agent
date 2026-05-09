@@ -590,13 +590,14 @@ function isRunnable(name) {
 function renderTabs() {
   const bar = document.getElementById('tab-bar');
   const canRun = isRunnable(active);
+  const prBtn = `<button class="run-btn" style="background:var(--violet);margin-right:8px" onclick="createPR()">⚑ Create PR</button>`;
   const runBtn = `<button class="run-btn" id="run-btn" ${canRun ? '' : 'disabled'} onclick="runActive()">▶ Run</button>`;
-  if (!openTabs.length) { bar.innerHTML = runBtn; return; }
+  if (!openTabs.length) { bar.innerHTML = prBtn + runBtn; return; }
   bar.innerHTML = openTabs.map(n => `
     <div class="tab ${n === active ? 'active' : ''}" data-file="${esc(n)}">
       ${fileIcon(n)} ${esc(n)}
       <span class="tab-close" data-close="${esc(n)}">×</span>
-    </div>`).join('') + runBtn;
+    </div>`).join('') + prBtn + runBtn;
 }
 
 function renderEditor() {
@@ -1160,6 +1161,65 @@ loadPersistedFiles();
 
 setPanel('terminal');
 renderAll();
+
+async function createPR() {
+  const prBtn = document.querySelector('.run-btn[onclick="createPR()"]');
+  if (prBtn) { prBtn.disabled = true; prBtn.innerText = '⏳ Creating PR...'; }
+
+  try {
+    const keyInput = document.getElementById('api-key').value.trim();
+    const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
+    const apiKey = keyInput || localStorage.getItem(LS_KEY) || (INJECTED_KEY !== "GROQ_API_KEY_PLACEHOLDER" ? INJECTED_KEY : '');
+    
+    if (!apiKey) throw new Error("No API key available to generate PR summary.");
+    
+    // Generate AI Summary based on code
+    const fileContents = Object.entries(files).map(([name, content]) => `// File: ${name}\n${content}`).join('\n\n');
+    
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 200,
+        messages: [
+          { role: 'system', content: 'You are a senior developer. Based on the file contents provided, generate a brief, one-sentence PR title and a very short description (max 2 sentences) summarizing what this code does. Format strictly as JSON: {"title": "the title", "description": "the description"}' },
+          { role: 'user', content: fileContents || 'Empty project' }
+        ],
+        response_format: { type: "json_object" }
+      })
+    });
+    
+    if (!res.ok) throw new Error("Failed to contact Groq API for PR summary.");
+    
+    const data = await res.json();
+    const summary = JSON.parse(data.choices[0].message.content);
+    
+    // Count rough lines of code for additions
+    let lines = 0;
+    for (const key in files) lines += files[key].split('\\n').length;
+    
+    // Use window.parent to dispatch to the main app state
+    if (window.parent && window.parent.apiFetch) {
+      await window.parent.apiFetch('POST', '/api/prs', {
+        title: summary.title,
+        branch: 'feature/vscode-ai-gen',
+        base: 'main',
+        status: 'open',
+        additions: lines,
+        deletions: 0
+      });
+      window.parent.toast("Pull Request created successfully!");
+      if (window.parent.meridianRefresh) window.parent.meridianRefresh();
+    } else {
+      termLine('err', '✗ Could not connect to parent app window to create PR.');
+    }
+  } catch (err) {
+    termLine('err', `✗ PR creation failed: ${err.message}`);
+  } finally {
+    if (prBtn) { prBtn.disabled = false; prBtn.innerText = '⚑ Create PR'; }
+  }
+}
 
 // Greet in terminal
 termLine('out', '  Meridian Code Editor ready. Ask the AI agent or press + to create a file.');

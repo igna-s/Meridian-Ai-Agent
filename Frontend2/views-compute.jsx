@@ -1,4 +1,4 @@
-// Lightning-style GPU Compute view
+// Meridian GPU Compute view
 
 const GPUS = [
   { id: "mi300x", name: "MI300X", vram: "192 GB HBM3", tflops: "10496 FP16", gen: "CDNA 3", tier: "flagship", priceHr: 4.89 },
@@ -105,7 +105,7 @@ const ComputeView = () => {
         <div className="page-title">
           <Icon name="code" size={15} style={{ color: "var(--accent)" }} />
           <span>Compute</span>
-          <span className="chip mono" style={{ color: "var(--accent)" }}>Lightning AI</span>
+          <span className="chip mono" style={{ color: "var(--accent)" }}>Meridian Compute</span>
         </div>
         <div className="topbar-spacer" />
         <div className="segmented">
@@ -463,7 +463,7 @@ const ComputeView = () => {
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <span style={{ fontSize: 20 }}>⚡</span>
                     <div>
-                      <div style={{ fontSize: 14, fontWeight: 600 }}>Lightning Pro</div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>Meridian Pro</div>
                       <div className="muted" style={{ fontSize: 11.5 }}>Renews Jun 1, 2026</div>
                     </div>
                     <div style={{ flex: 1 }} />

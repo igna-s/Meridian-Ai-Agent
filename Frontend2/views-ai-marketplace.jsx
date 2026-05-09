@@ -647,7 +647,7 @@ const AIMarketplaceView = () => {
         <div className="page-title">
           <Icon name="bolt" size={15} style={{ color: "var(--accent)" }} />
           <span>AI Infrastructure</span>
-          <span className="chip mono" style={{ color: "var(--accent)" }}>Lightning</span>
+          <span className="chip mono" style={{ color: "var(--accent)" }}>Meridian</span>
         </div>
         <div className="topbar-spacer" />
         <div className="segmented">
