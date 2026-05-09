@@ -365,25 +365,25 @@
     <div id="sidebar-explorer">
       <div class="sidebar-header">
         Explorer
-        <button class="sidebar-btn" title="Nuevo archivo" onclick="newFile()">+</button>
+        <button class="sidebar-btn" title="New file" onclick="newFile()">+</button>
       </div>
       <div class="file-tree" id="file-tree">
-        <div class="empty-state">Sin archivos.<br>Presioná <strong>+</strong> para crear uno.</div>
+        <div class="empty-state">No files.<br>Press <strong>+</strong> to create one.</div>
       </div>
     </div>
 
     <!-- Agent -->
     <div id="sidebar-agent">
-      <div class="sidebar-header">Agente AI</div>
+      <div class="sidebar-header">Code Agent</div>
       <div class="api-row">
-        <div class="api-label">Anthropic API Key</div>
-        <input type="password" class="api-input" id="api-key" placeholder="sk-ant-..." />
+        <div class="api-label">Groq API Key</div>
+        <input type="password" class="api-input" id="api-key" placeholder="gsk_..." />
       </div>
       <div class="agent-chat" id="agent-chat">
-        <div class="chat-msg assistant">Hola! Soy tu agente de código. Puedo crear, editar y ejecutar archivos. ¿Qué querés hacer?</div>
+        <div class="chat-msg assistant">Hi! I'm your code agent. I can create, edit and run HTML, CSS and JS files. What would you like to build?</div>
       </div>
       <div class="chat-input-row">
-        <textarea class="chat-input" id="chat-input" rows="2" placeholder="Pedime algo..." onkeydown="chatKey(event)"></textarea>
+        <textarea class="chat-input" id="chat-input" rows="2" placeholder="Ask me to build something..." onkeydown="chatKey(event)"></textarea>
         <button class="chat-send" id="chat-send" onclick="sendChat()">▶</button>
       </div>
     </div>
@@ -410,7 +410,7 @@
 
     <div class="editor-welcome" id="editor-welcome">
       <h2>Meridian Code Editor</h2>
-      <p>Creá un archivo con <strong>+</strong> en el explorador, o pedile al <strong>Agente AI</strong> que lo haga.</p>
+      <p>Create a file with <strong>+</strong> in the explorer, or ask the <strong>AI Agent</strong> to do it.</p>
       <div class="ext">HTML · JavaScript · CSS · JSON</div>
     </div>
 
@@ -427,8 +427,8 @@
         <div class="ptab active" id="ptab-terminal" onclick="setPanel('terminal')">TERMINAL</div>
         <div class="ptab" id="ptab-preview" onclick="setPanel('preview')">PREVIEW</div>
         <div class="panel-actions">
-          <button class="pbtn" id="expand-btn" onclick="toggleExpand()" title="Expandir preview">⤢</button>
-          <button class="pbtn" onclick="clearTerm()">Limpiar</button>
+          <button class="pbtn" id="expand-btn" onclick="toggleExpand()" title="Expand preview">⤢</button>
+          <button class="pbtn" onclick="clearTerm()">Clear</button>
         </div>
       </div>
       <div class="terminal-body" id="terminal-body">
@@ -451,6 +451,12 @@
 </div>
 
 <script>
+// ── Constants ──────────────────────────────────────────────────────────
+const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const LS_FILES   = 'meridian-vscode-files';
+const LS_KEY     = 'meridian-groq-key';
+
 // ── State ──────────────────────────────────────────────────────────────
 const files   = {};      // { name: content }
 let openTabs  = [];      // ordered open file names
@@ -460,7 +466,7 @@ let expanded     = false;
 let agentBusy    = false;
 let codeGenDone  = false;
 let codeStreaming = false;
-const agentHistory = []; // Claude messages array
+const agentHistory = []; // chat messages array
 
 // ── File icons / language ──────────────────────────────────────────────
 function fileIcon(name) {
@@ -477,14 +483,29 @@ function fileLang(name) {
 }
 function defaultContent(name) {
   const ext = name.split('.').pop().toLowerCase();
-  if (ext === 'html') return `<!DOCTYPE html>\n<html lang="es">\n<head>\n  <meta charset="UTF-8">\n  <title>Mi página</title>\n  <style>\n    body { font-family: sans-serif; padding: 20px; }\n  </style>\n</head>\n<body>\n  <h1>Hola mundo</h1>\n  <p>Mi primera página.</p>\n</body>\n</html>`;
-  if (ext === 'js')   return `// ${name}\nconsole.log('Hola desde ${name}!');\n`;
+  if (ext === 'html') return `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <title>My page</title>\n  <style>\n    body { font-family: sans-serif; padding: 20px; }\n  </style>\n</head>\n<body>\n  <h1>Hello world</h1>\n  <p>My first page.</p>\n</body>\n</html>`;
+  if (ext === 'js')   return `// ${name}\nconsole.log('Hello from ${name}!');\n`;
   if (ext === 'css')  return `/* ${name} */\nbody {\n  font-family: sans-serif;\n  margin: 0;\n  padding: 20px;\n}\n`;
   if (ext === 'json') return `{\n  \n}\n`;
   return '';
 }
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Persistence ────────────────────────────────────────────────────────
+function persistFiles() {
+  try { localStorage.setItem(LS_FILES, JSON.stringify(files)); } catch(e) {}
+}
+function loadPersistedFiles() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_FILES) || '{}');
+    Object.assign(files, saved);
+    if (Object.keys(files).length) {
+      openTabs = Object.keys(files).slice(0, 5);
+      active = openTabs[0];
+    }
+  } catch(e) {}
 }
 
 // ── File operations ────────────────────────────────────────────────────
@@ -495,6 +516,7 @@ function createFile(name, content) {
   if (!openTabs.includes(name)) openTabs.push(name);
   active = name;
   renderAll();
+  persistFiles();
 }
 
 function openFile(name) {
@@ -518,17 +540,18 @@ function deleteFile(name) {
   closeTab(name);
   delete files[name];
   renderAll();
+  persistFiles();
 }
 
 function saveCurrent() {
   if (!active) return;
   const ta = document.getElementById('code-textarea');
-  if (ta) files[active] = ta.value;
+  if (ta) { files[active] = ta.value; persistFiles(); }
 }
 
 // ── New file prompt ────────────────────────────────────────────────────
 function newFile() {
-  const name = prompt('Nombre del archivo (ej: index.html, app.js):');
+  const name = prompt('File name (e.g., index.html, app.js):');
   if (!name || !name.trim()) return;
   const trimmed = name.trim();
   if (files[trimmed] !== undefined) { openFile(trimmed); return; }
@@ -547,14 +570,14 @@ function renderTree() {
   const tree = document.getElementById('file-tree');
   const names = Object.keys(files);
   if (!names.length) {
-    tree.innerHTML = '<div class="empty-state">Sin archivos.<br>Presioná <strong>+</strong> para crear uno.</div>';
+    tree.innerHTML = '<div class="empty-state">No files.<br>Press <strong>+</strong> to create one.</div>';
     return;
   }
   tree.innerHTML = names.map(n => `
     <div class="file-item ${n === active ? 'active' : ''}" data-file="${esc(n)}">
       ${fileIcon(n)}
       <span class="file-name">${esc(n)}</span>
-      <button class="file-del" data-del="${esc(n)}" title="Eliminar">×</button>
+      <button class="file-del" data-del="${esc(n)}" title="Delete">×</button>
     </div>`).join('');
 }
 
@@ -704,21 +727,26 @@ function runActive() {
 
 async function runFile(name) {
   const content = files[name];
-  if (content === undefined) return 'Error: archivo no encontrado';
+  if (content === undefined) return 'Error: file not found';
   const ext = name.split('.').pop().toLowerCase();
   if (ext === 'html' || ext === 'htm') return runHTML(name, content);
-  termLine('warn', `Solo se pueden ejecutar archivos HTML (.html)`);
-  return `No ejecutable: .${ext}`;
+  if (ext === 'js')  return runJS(name, content);
+  if (ext === 'css') {
+    termLine('warn', `CSS files cannot run standalone. Include ${name} in an HTML file.`);
+    return `Not directly runnable. Tip: create an HTML file that links to ${name}.`;
+  }
+  termLine('warn', `To run this file: open ${name} in a browser or with node ${name}`);
+  return `Not runnable: .${ext}`;
 }
 
 function runHTML(name, content) {
   termCmd(`open ${name}`);
   const lines = content.split('\n').length;
-  termLine('out', `  Cargando ${name} (${lines} líneas)…`);
-  termLine('ok', `✓ ${name} ejecutado — Preview listo`);
+  termLine('out', `  Loading ${name} (${lines} lines)…`);
+  termLine('ok', `✓ ${name} rendered — Preview active`);
   document.getElementById('preview-iframe').srcdoc = content;
   setPanel('preview');
-  return 'HTML preview abierto';
+  return `HTML preview opened. Command to run locally: npx serve .`;
 }
 
 function runJS(name, content) {
@@ -737,7 +765,7 @@ function runJS(name, content) {
       const { logs, error } = e.data;
       logs.forEach(([t, msg]) => termLine(t === 'error' ? 'err' : t === 'warn' ? 'warn' : 'out', msg));
       if (error) { termLine('err', `⚠ ${error}`); resolve(`Error: ${error}`); }
-      else { termLine('ok', `✓ ${name} ejecutado`); resolve(logs.map(([,m]) => m).join('\n') || '(sin output)'); }
+      else { termLine('ok', `✓ ${name} executed`); resolve(logs.map(([,m]) => m).join('\n') || '(no output)'); }
     }
     window.addEventListener('message', handler);
     const src = content.replace(/<\/script>/gi, '<\\/script>');
@@ -755,23 +783,31 @@ catch(e){parent.postMessage({type:'_meridian_result',logs:_L,error:e.message},'*
   });
 }
 
-// ── AI Agent ──────────────────────────────────────────────────────────
-const SYSTEM = `Sos un agente de código embebido en el editor Meridian. Podés crear, editar y ejecutar archivos en el editor del usuario.
+// ── AI Agent (Groq / OpenAI-compatible) ───────────────────────────────
+const SYSTEM = `You are a code agent embedded in the Meridian Code Editor. You create, edit and run web files (HTML, CSS, JavaScript) for the user.
 
-Usá las herramientas para completar las tareas. Siempre generá contenido real y funcional.
-Respondé en español. Después de crear o editar archivos, podés ejecutarlos si tiene sentido.`;
+Rules:
+- Always produce complete, functional, beautiful code (no placeholders, no TODO comments).
+- Use modern HTML5/CSS3/JS. For HTML pages, inline styles or a <style> tag is fine (no build step).
+- After creating a file, always call run_file so the user sees the result immediately.
+- Mention the terminal command to run the file (e.g. "npx serve ." or just open index.html in a browser).
+- Be concise in chat — let the code speak.
+- Respond in English.`;
 
+// OpenAI-compatible function definitions for Groq
 const TOOLS = [
-  { name: 'create_file', description: 'Crea un nuevo archivo (o sobreescribe uno existente) con el nombre y contenido dados.',
-    input_schema: { type:'object', properties: { name:{type:'string',description:'Nombre del archivo, ej: "index.html"'}, content:{type:'string',description:'Contenido completo del archivo'} }, required:['name','content'] } },
-  { name: 'edit_file', description: 'Edita un archivo existente reemplazando su contenido completo.',
-    input_schema: { type:'object', properties: { name:{type:'string'}, content:{type:'string'} }, required:['name','content'] } },
-  { name: 'read_file', description: 'Lee el contenido de un archivo.',
-    input_schema: { type:'object', properties: { name:{type:'string'} }, required:['name'] } },
-  { name: 'list_files', description: 'Lista todos los archivos en el editor.',
-    input_schema: { type:'object', properties: {} } },
-  { name: 'run_file', description: 'Ejecuta un archivo. HTML abre preview, JS muestra output en terminal.',
-    input_schema: { type:'object', properties: { name:{type:'string'} }, required:['name'] } },
+  { type: 'function', function: { name: 'create_file', description: 'Create a new file with the given name and content. Use for HTML, CSS, JS.',
+    parameters: { type:'object', properties: { name:{type:'string',description:'Filename, e.g. index.html'}, content:{type:'string',description:'Full file content'} }, required:['name','content'] } } },
+  { type: 'function', function: { name: 'edit_file', description: 'Replace the entire content of an existing file.',
+    parameters: { type:'object', properties: { name:{type:'string'}, content:{type:'string'} }, required:['name','content'] } } },
+  { type: 'function', function: { name: 'read_file', description: 'Read the current content of a file.',
+    parameters: { type:'object', properties: { name:{type:'string'} }, required:['name'] } } },
+  { type: 'function', function: { name: 'list_files', description: 'List all files in the editor.',
+    parameters: { type:'object', properties: {} } } },
+  { type: 'function', function: { name: 'run_file', description: 'Execute a file — HTML opens live preview, JS runs in sandbox.',
+    parameters: { type:'object', properties: { name:{type:'string'} }, required:['name'] } } },
+  { type: 'function', function: { name: 'run_command', description: 'Run a terminal command (e.g., "node file.js", "npm install").',
+    parameters: { type:'object', properties: { command:{type:'string', description:'The terminal command to run'} }, required:['command'] } } },
 ];
 
 function chatKey(e) {
@@ -800,11 +836,15 @@ function addToolMsg(name, input) {
 
 async function sendChat() {
   if (agentBusy) return;
-  const apiKey = document.getElementById('api-key').value.trim();
+  // Prefer key from input; fall back to centralized localStorage key
+  const keyInput = document.getElementById('api-key').value.trim();
+  const apiKey = keyInput || localStorage.getItem(LS_KEY) || '';
+  if (keyInput) localStorage.setItem(LS_KEY, keyInput); // sync back
+
   const inputEl = document.getElementById('chat-input');
   const msg = inputEl.value.trim();
   if (!msg) return;
-  if (!apiKey) { addMsg('err', 'Ingresá tu API key de Anthropic primero.'); return; }
+  if (!apiKey) { addMsg('err', '⚠ No API key. Enter your Groq key above or add it in Settings → AI.'); return; }
 
   inputEl.value = '';
   agentBusy = true;
@@ -813,7 +853,7 @@ async function sendChat() {
   addMsg('user', msg);
   agentHistory.push({ role: 'user', content: msg });
 
-  const thinking = addMsg('thinking', '⋯ Pensando…');
+  const thinking = addMsg('thinking', '⋯ Thinking…');
   try {
     await agentLoop(apiKey, thinking);
   } catch(e) {
@@ -827,47 +867,50 @@ async function sendChat() {
 
 async function agentLoop(apiKey, thinkingEl) {
   let first = true;
-  while (true) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const MAX_ITERS = 8;
+  for (let iter = 0; iter < MAX_ITERS; iter++) {
+    const res = await fetch(GROQ_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: GROQ_MODEL,
         max_tokens: 4096,
-        system: SYSTEM,
-        messages: agentHistory,
+        messages: [{ role: 'system', content: SYSTEM }, ...agentHistory],
         tools: TOOLS,
+        tool_choice: 'auto',
       })
     });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${res.status}`);
+      throw new Error(err.error?.message || `Groq HTTP ${res.status}`);
     }
 
     const data = await res.json();
-
     if (first) { thinkingEl.remove(); first = false; }
 
-    agentHistory.push({ role: 'assistant', content: data.content });
+    const choice = data.choices?.[0];
+    const msg = choice?.message;
+    if (!msg) break;
 
-    const texts    = data.content.filter(b => b.type === 'text');
-    const toolUses = data.content.filter(b => b.type === 'tool_use');
+    agentHistory.push(msg);
 
-    if (texts.length) addMsg('assistant', texts.map(b => b.text).join('\n'));
-    if (data.stop_reason !== 'tool_use') break;
+    // Text content
+    if (msg.content) addMsg('assistant', msg.content);
+
+    // Tool calls (OpenAI format)
+    const toolCalls = msg.tool_calls || [];
+    if (!toolCalls.length || choice.finish_reason === 'stop') break;
 
     const results = [];
-    for (const tu of toolUses) {
-      addToolMsg(tu.name, tu.input);
-      const out = await execTool(tu.name, tu.input);
-      results.push({ type: 'tool_result', tool_use_id: tu.id, content: String(out) });
+    for (const tc of toolCalls) {
+      let input;
+      try { input = JSON.parse(tc.function.arguments); } catch { input = {}; }
+      addToolMsg(tc.function.name, input);
+      const out = await execTool(tc.function.name, input);
+      results.push({ role: 'tool', tool_call_id: tc.id, content: String(out) });
     }
-    agentHistory.push({ role: 'user', content: results });
+    agentHistory.push(...results);
   }
 }
 
@@ -875,26 +918,36 @@ async function execTool(name, input) {
   switch (name) {
     case 'create_file':
       createFile(input.name, input.content);
-      return `Archivo "${input.name}" creado.`;
+      return `File "${input.name}" created.`;
     case 'edit_file':
-      if (files[input.name] === undefined) return `Error: "${input.name}" no existe.`;
+      if (files[input.name] === undefined) return `Error: "${input.name}" does not exist.`;
       files[input.name] = input.content;
       if (active === input.name) { document.getElementById('code-textarea').value = input.content; updateLineNums(); }
       renderTree(); renderTabs();
-      return `Archivo "${input.name}" editado.`;
+      return `File "${input.name}" edited.`;
     case 'read_file':
-      if (files[input.name] === undefined) return `Error: "${input.name}" no existe.`;
+      if (files[input.name] === undefined) return `Error: "${input.name}" does not exist.`;
       return files[input.name];
     case 'list_files': {
       const ns = Object.keys(files);
-      return ns.length ? ns.join('\n') : 'No hay archivos.';
+      return ns.length ? ns.join('\n') : 'No files.';
     }
     case 'run_file':
-      if (files[input.name] === undefined) return `Error: "${input.name}" no existe.`;
+      if (files[input.name] === undefined) return `Error: "${input.name}" does not exist.`;
       openFile(input.name);
       return await runFile(input.name);
+    case 'run_command':
+      termCmd(input.command);
+      if (input.command.startsWith('node ')) {
+        const f = input.command.split(' ')[1];
+        if (files[f]) { openFile(f); return await runFile(f); }
+        termLine('err', `Error: file ${f} not found`);
+        return `Error: file ${f} not found`;
+      }
+      termLine('out', `(Simulated) ${input.command}`);
+      return `Simulated command execution success.`;
     default:
-      return `Herramienta desconocida: ${name}`;
+      return `Unknown tool: ${name}`;
   }
 }
 
@@ -1074,7 +1127,7 @@ function doCommit() {
 document.getElementById('file-tree').addEventListener('click', e => {
   const del  = e.target.closest('[data-del]');
   const item = e.target.closest('[data-file]');
-  if (del)  { e.stopPropagation(); if (confirm(`Eliminar ${del.dataset.del}?`)) deleteFile(del.dataset.del); }
+  if (del)  { e.stopPropagation(); if (confirm(`Delete ${del.dataset.del}?`)) deleteFile(del.dataset.del); }
   else if (item) openFile(item.dataset.file);
 });
 
@@ -1091,8 +1144,25 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Init ───────────────────────────────────────────────────────────────
+// Load persisted files from localStorage
+loadPersistedFiles();
+
+// Pre-fill API key from centralized store
+(function() {
+  const k = localStorage.getItem(LS_KEY);
+  if (k) document.getElementById('api-key').value = k;
+  // Sync key changes back to centralized store
+  document.getElementById('api-key').addEventListener('change', function() {
+    if (this.value.trim()) localStorage.setItem(LS_KEY, this.value.trim());
+  });
+})();
+
 setPanel('terminal');
 renderAll();
+
+// Greet in terminal
+termLine('out', '  Meridian Code Editor ready. Ask the AI agent or press + to create a file.');
+termLine('ok', '✓ Session storage active — files persist across refreshes.');
 </script>
 
 <div class="commit-overlay" id="commit-overlay">

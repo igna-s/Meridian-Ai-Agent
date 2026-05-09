@@ -661,6 +661,14 @@ const AIMarketplaceView = () => {
         <button className="btn ghost sm" onClick={() => window.toast("Docs opened")}>
           <Icon name="docs" size={13} /> Docs
         </button>
+        <button className="btn ghost sm" style={{ color: "var(--accent)" }}
+          onClick={() => window.openAI(
+            `I'm browsing the AI Infrastructure marketplace. Help me choose the right GPU and model for my use case.`,
+            "compute",
+            { gpus: STUDIO_GPU_TABLE, models: LLM_MODELS.map(m=>({id:m.id,name:m.name,category:m.category,inputPrice:m.inputPrice,outputPrice:m.outputPrice})) }
+          )}>
+          <Icon name="sparkle" size={13} /> Ask AI
+        </button>
       </div>
 
       <div className="scroll-y" style={{ flex: 1, padding: 20 }}>

@@ -117,6 +117,14 @@ const ComputeView = () => {
           ))}
         </div>
         <button className="btn ghost sm" onClick={() => window.toast("Docs opened")}><Icon name="docs" size={13} /> Docs</button>
+        <button className="btn ghost sm" style={{ color: "var(--accent)" }}
+          onClick={() => window.openAI(
+            `Analyze my compute usage. ${jobs.filter(j=>j.status==='running').length} jobs running.`,
+            "compute",
+            { jobs, quota: QUOTA_DATA }
+          )}>
+          <Icon name="sparkle" size={13} /> AI Analysis
+        </button>
       </div>
 
       <div className="scroll-y" style={{ flex: 1, padding: 20 }}>

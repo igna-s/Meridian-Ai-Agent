@@ -1,0 +1,10 @@
+[
+  { "id": "n1", "type": "mention", "from": "u1", "target": "AUR-412", "text": "mentioned you in a comment", "snippet": "@you — can you weigh in on the tile-size heuristic? I think 256 is…", "time": "12m", "unread": true, "kind": "issue" },
+  { "id": "n2", "type": "review",  "from": "u4", "target": "#2339",   "text": "requested your review on", "snippet": "feat(tokens): v3 semantic layer", "time": "34m", "unread": true, "kind": "pr" },
+  { "id": "n3", "type": "assign",  "from": "u5", "target": "NIM-110", "text": "assigned you", "snippet": "Regional failover runbook for EU-West primary", "time": "1h", "unread": true, "kind": "issue" },
+  { "id": "n4", "type": "status",  "from": "u2", "target": "#2341",   "text": "marked checks failing on", "snippet": "e2e-canvas: 'cursor-reconnect' flaked on retry", "time": "2h", "unread": true, "kind": "pr" },
+  { "id": "n5", "type": "comment", "from": "u6", "target": "EMB-523", "text": "replied in a thread", "snippet": "The snapshot approach feels right, but we should bound…", "time": "3h", "unread": false, "kind": "issue" },
+  { "id": "n6", "type": "doc",     "from": "u1", "target": "d12",     "text": "updated the PRD", "snippet": "Aurora: collaborative canvas — v0.4 with multi-select changes", "time": "6h", "unread": false, "kind": "doc" },
+  { "id": "n7", "type": "merged",  "from": "u6", "target": "#2334",   "text": "merged pull request", "snippet": "feat(comments): resolve threads with context snapshot", "time": "1d", "unread": false, "kind": "pr" },
+  { "id": "n8", "type": "due",     "target": "HAL-033",               "text": "is due tomorrow", "snippet": "Rotate SSO signing keys for SAML federation", "time": "1d", "unread": false, "kind": "issue" }
+]

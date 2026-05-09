@@ -183,6 +183,9 @@ const SprintsView = ({ setView, setIssueId }) => {
 const PRsView = () => {
   const [filter, setFilter] = React.useState("all");
   const [prs, setPrs] = React.useState(PRS);
+  const [aiOpen, setAiOpen] = React.useState(false);
+  const [aiText, setAiText] = React.useState("");
+  const [aiLoading, setAiLoading] = React.useState(false);
 
   React.useEffect(() => {
     const load = () => window.apiFetch('GET', '/api/prs').then(setPrs).catch(() => setPrs([...PRS]));
@@ -192,6 +195,46 @@ const PRsView = () => {
   }, []);
 
   const list = prs.filter(pr => filter === "all" || pr.status === filter);
+
+  const runPRAnalysis = async () => {
+    const key = localStorage.getItem('meridian-groq-key') || '';
+    if (!key) { window.openAI("Analyze all open pull requests", "pr", { prs: list }); return; }
+    setAiOpen(true); setAiText(""); setAiLoading(true);
+
+    const prSummary = list.map(p => ({
+      id: p.id, title: p.title, status: p.status, branch: p.branch,
+      additions: p.additions, deletions: p.deletions,
+      checks: p.checks, updated: p.updated,
+    }));
+
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile', max_tokens: 800, stream: true,
+          messages: [
+            { role: 'system', content: 'You are the Meridian PR Analyst. Analyze pull requests and give: 1) Overall risk level (High/Medium/Low), 2) Top 3 action items for the team, 3) Any PRs with failing checks or missing reviewers. Be direct and concise. Use markdown.' },
+            { role: 'user', content: `Analyze these ${prSummary.length} PRs:\n${JSON.stringify(prSummary, null, 2)}` },
+          ],
+        }),
+      });
+      const reader = res.body.getReader(); const decoder = new TextDecoder(); let full = '';
+      while (true) {
+        const { done, value } = await reader.read(); if (done) break;
+        for (const line of decoder.decode(value).split('\n').filter(l => l.startsWith('data: ') && l !== 'data: [DONE]')) {
+          try { const delta = JSON.parse(line.slice(6)).choices?.[0]?.delta?.content || ''; full += delta; setAiText(full); } catch(_) {}
+        }
+      }
+    } catch(e) { setAiText(`⚠ ${e.message}`); }
+    setAiLoading(false);
+  };
+
+  const renderMd = t => t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,"<code style='background:var(--bg-3);padding:1px 4px;border-radius:3px;font-family:var(--font-mono);font-size:0.9em'>$1</code>")
+    .replace(/\n/g,'<br>');
+
   return (
     <div className="flex col flex-1" style={{ minWidth: 0 }}>
       <div className="page-header">
@@ -213,9 +256,33 @@ const PRsView = () => {
           ))}
         </div>
         <button className="btn ghost sm" onClick={() => window.openFilter("pull requests")}><Icon name="filter" size={13} /> Filter</button>
-        <button className="btn ghost sm" onClick={() => window.openAI("What's the status of open pull requests?")}><Icon name="sparkle" size={13} /> AI Summary</button>
+        <button className="btn ghost sm" style={{ color: "var(--accent)" }} onClick={runPRAnalysis}><Icon name="sparkle" size={13} /> AI Analysis</button>
         <button className="btn sm primary" onClick={() => window.openNewPR()}><Icon name="plus" size={13} /> New PR</button>
       </div>
+
+      {/* AI Analysis panel */}
+      {aiOpen && (
+        <div style={{ margin: "12px 16px 0", padding: 16, background: "var(--bg-1)", border: "1px solid var(--border)", borderRadius: 10, position: "relative" }}>
+          <div className="flex items-center gap-8" style={{ marginBottom: 10 }}>
+            <Icon name="sparkle" size={14} style={{ color: "var(--accent)" }} />
+            <strong style={{ fontSize: 13 }}>PR Analyst</strong>
+            {aiLoading && <span className="chip mono" style={{ color: "var(--amber)" }}>analyzing…</span>}
+            <div style={{ flex: 1 }} />
+            <button className="icon-btn" onClick={() => setAiOpen(false)}><Icon name="x" size={13} /></button>
+          </div>
+          {aiText
+            ? <div style={{ fontSize: 13, lineHeight: 1.6, color: "var(--fg-1)" }} dangerouslySetInnerHTML={{ __html: renderMd(aiText) }} />
+            : <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+                {[0,1,2].map(i => <span key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)", animation: `pulse 1s ease-in-out ${i*0.2}s infinite` }} />)}
+              </div>
+          }
+          {!aiLoading && aiText && (
+            <button className="btn ghost sm" style={{ marginTop: 10 }} onClick={() => window.openAI("Dive deeper into these PRs", "pr", { prs: list })}>
+              <Icon name="sparkle" size={12} /> Open in AI panel
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="scroll-y" style={{ flex: 1 }}>
         {list.map((pr, i) => {
@@ -233,20 +300,20 @@ const PRsView = () => {
                 </div>
                 <div className="flex items-center gap-10 muted" style={{ fontSize: 11.5, flexWrap: "wrap" }}>
                   <span className="mono">{pr.id}</span>
-                  <span>opened by <strong className="mono" style={{ color: "var(--fg-1)" }}>@{author.handle}</strong></span>
-                  <span className="flex items-center gap-4"><Icon name="branch" size={11} /><span className="mono">{pr.branch}</span> → <span className="mono">{pr.base}</span></span>
+                  <span>opened by <strong className="mono" style={{ color: "var(--fg-1)" }}>@{author?.handle || "you"}</strong></span>
+                  <span className="flex items-center gap-4"><Icon name="branch" size={11} /><span className="mono">{pr.branch}</span> → <span className="mono">{pr.base || "main"}</span></span>
                   <span>· updated {pr.updated}</span>
                 </div>
               </div>
               {/* Checks */}
               <div className="flex items-center gap-6" style={{ fontSize: 11, flexShrink: 0 }}>
-                {pr.checks.passed > 0 && <span className="flex items-center gap-2 mono" style={{ color: "var(--status-done)" }}><Icon name="check" size={11} strokeWidth={2.5} />{pr.checks.passed}</span>}
-                {pr.checks.failed > 0 && <span className="flex items-center gap-2 mono" style={{ color: "var(--rose)" }}><Icon name="x" size={11} strokeWidth={2.5} />{pr.checks.failed}</span>}
-                {pr.checks.running > 0 && <span className="flex items-center gap-2 mono" style={{ color: "var(--amber)" }}><Icon name="clock" size={11} />{pr.checks.running}</span>}
+                {pr.checks?.passed > 0 && <span className="flex items-center gap-2 mono" style={{ color: "var(--status-done)" }}><Icon name="check" size={11} strokeWidth={2.5} />{pr.checks.passed}</span>}
+                {pr.checks?.failed > 0 && <span className="flex items-center gap-2 mono" style={{ color: "var(--rose)" }}><Icon name="x" size={11} strokeWidth={2.5} />{pr.checks.failed}</span>}
+                {pr.checks?.running > 0 && <span className="flex items-center gap-2 mono" style={{ color: "var(--amber)" }}><Icon name="clock" size={11} />{pr.checks.running}</span>}
               </div>
               <div className="flex items-center gap-2 mono" style={{ fontSize: 11, flexShrink: 0, minWidth: 90, justifyContent: "flex-end" }}>
                 <span style={{ color: "var(--status-done)" }}>+{pr.additions}</span>
-                <span style={{ color: "var(--rose)" }}>−{pr.deletions}</span>
+                <span style={{ color: "var(--rose)" }}>−{pr.deletions || 0}</span>
               </div>
               <div style={{ flexShrink: 0, width: 60, display: "flex", justifyContent: "flex-end" }}>
                 <AvatarStack users={reviewers} size="xs" />
@@ -258,7 +325,6 @@ const PRsView = () => {
     </div>
   );
 };
-
 // ==== TEAM ====
 const TeamView = () => {
   const teams = [

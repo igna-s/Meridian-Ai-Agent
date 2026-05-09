@@ -21,6 +21,7 @@
   <script type="text/babel" src="data.jsx"></script>
   <script src="mock-api.jsx"></script>
   <script type="text/babel" src="api-client.jsx"></script>
+  <script type="text/babel" src="ai-engine.jsx"></script>
   <script type="text/babel" src="interactions.jsx"></script>
   <script type="text/babel" src="detail-modals.jsx"></script>
   <script type="text/babel" src="shell.jsx"></script>
@@ -33,8 +34,6 @@
   <script type="text/babel" src="views-compute.jsx"></script>
   <script type="text/babel" src="views-ai-marketplace.jsx"></script>
   <script type="text/babel" src="views-nexus.jsx"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <script type="text/babel">
     const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -120,21 +119,50 @@
           if (e.data.type === "__deactivate_edit_mode") setTweaksOpen(false);
           if (e.data.type === "meridian:vscode-commit") {
             const { fileName, commitMessage, branch, additions } = e.data;
-            const prId = `AUR-${Math.floor(700 + Math.random() * 100)}`;
+            const issueId = `AUR-${Math.floor(700 + Math.random() * 100)}`;
+            const prId = `#${Math.floor(2000 + Math.random() * 1000)}`;
+            
+            // 1. Add PR
             PRS.unshift({
               id: prId, title: `feat: add ${fileName} via AI codegen`, status: "open",
-              author: "you", branch: branch || "feat/ai-generated",
+              author: "you", branch: branch || "feat/ai-generated", base: "main", issue: issueId,
               project: "Aurora", additions: additions || 0, deletions: 0,
-              checks: "passing", reviewers: [], comments: 0, draft: false,
-              updatedAt: "just now",
+              checks: { passed: 0, failed: 0, running: 1 }, reviewers: [], updated: "just now",
             });
+            
+            // 2. Add Issue
+            ISSUES.unshift({
+              id: issueId, title: `Implement ${fileName}`, status: "progress", priority: "high", 
+              project: "aurora", assignees: ["u1"], labels: ["feature"], due: "Today", 
+              created: "just now", estimate: 3, commentCount: 0, sprint: "Iter 42", branch: branch || "feat/ai-generated"
+            });
+            
+            // 3. Add to Docs
+            DOCS[0].children.push({
+               id: `d${Date.now()}`, title: `RFC — ${fileName} architecture`, updated: "just now", author: "you"
+            });
+            
+            // 4. Add to Roadmap
+            ROADMAP.unshift({
+              id: `r${Date.now()}`, title: `Launch ${fileName} capabilities`, project: "aurora", 
+              q: "Q2", startCol: 0, span: 2, progress: 10, status: "progress"
+            });
+            
+            // 5. Update Sprint
+            const activeSprint = SPRINTS.find(s => s.active);
+            if (activeSprint) {
+              activeSprint.scope += 1;
+            }
+            
+            // 6. Add Inbox Notification
             INBOX.unshift({
               id: `inbox-${Date.now()}`, type: "pr", unread: true,
               title: `Your PR is open: feat: add ${fileName} via AI codegen`,
               body: commitMessage || "AI-generated code committed and pushed.",
-              time: "just now", actor: "you",
+              time: "just now", actor: "you", target: prId, kind: "pr"
             });
-            window.toast(`PR created: feat: add ${fileName} via AI codegen`);
+            
+            window.toast(`PR ${prId} created and linked to ${issueId}. Docs and Roadmap updated.`);
             window.meridianRefresh && window.meridianRefresh();
           }
         };
@@ -197,7 +225,11 @@
       );
     }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    ReactDOM.createRoot(document.getElementById("root")).render(
+      <AIPanelProvider>
+        <App />
+      </AIPanelProvider>
+    );
   </script>
 </body>
 </html>

@@ -1,0 +1,7 @@
+[
+  { "id": "aurora",  "name": "Aurora",  "code": "AUR", "color": "oklch(0.78 0.14 220)" },
+  { "id": "tessera", "name": "Tessera", "code": "TES", "color": "oklch(0.72 0.17 300)" },
+  { "id": "nimbus",  "name": "Nimbus",  "code": "NIM", "color": "oklch(0.80 0.14 75)"  },
+  { "id": "halcyon", "name": "Halcyon", "code": "HAL", "color": "oklch(0.80 0.16 145)" },
+  { "id": "ember",   "name": "Ember",   "code": "EMB", "color": "oklch(0.72 0.17 20)"  }
+]

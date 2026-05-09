@@ -19,6 +19,7 @@ const SettingsView = ({ settings, setSettings }) => {
     { group: "Integrations", items: [
       { id: "integrations", label: "Connected apps", icon: "link" },
       { id: "api", label: "API & webhooks", icon: "globe" },
+      { id: "ai", label: "AI & Integrations", icon: "sparkle" },
       { id: "import", label: "Import / export", icon: "download" },
     ]},
   ];
@@ -60,6 +61,7 @@ const SettingsView = ({ settings, setSettings }) => {
             {section === "account" && <PlaceholderSection title="My account" desc="Profile, email, password, two-factor." />}
             {section === "integrations" && <IntegrationsSection />}
             {section === "api" && <PlaceholderSection title="API & webhooks" desc="Personal access tokens, OAuth apps, webhook endpoints." />}
+            {section === "ai" && <AISection />}
             {section === "import" && <PlaceholderSection title="Import / export" desc="Migrate from Jira, Linear, GitHub Issues, Asana. Bulk export as CSV or JSON." />}
           </div>
         </div>
@@ -417,6 +419,68 @@ const PlaceholderSection = ({ title, desc }) => (
     </div>
   </SetGroup>
 );
+
+const AISection = () => {
+  const [key, setKey] = React.useState(() => localStorage.getItem('meridian-groq-key') || '');
+  const [testing, setTesting] = React.useState(false);
+  const [testResult, setTestResult] = React.useState(null);
+
+  const save = () => {
+    localStorage.setItem('meridian-groq-key', key.trim());
+    window.toast('Groq API key saved');
+  };
+
+  const test = async () => {
+    const k = key.trim();
+    if (!k) { window.toast('Enter a key first'); return; }
+    setTesting(true); setTestResult(null);
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${k}` },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 10, messages: [{ role: 'user', content: 'Reply: ok' }] })
+      });
+      if (res.ok) { setTestResult('ok'); localStorage.setItem('meridian-groq-key', k); }
+      else { const e = await res.json(); setTestResult(e.error?.message || 'Error'); }
+    } catch(e) { setTestResult(e.message); }
+    setTesting(false);
+  };
+
+  return (
+    <SetGroup title="AI & Integrations" desc="Configure the AI provider used across all Meridian views — Code Editor, PR Analyst, Sprint Coach, and more.">
+      <SetRow title="Groq API Key" desc={<>Get your key at <strong>console.groq.com</strong>. Stored in browser localStorage only — never sent to any server.</>}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 320 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              type="password" value={key}
+              onChange={e => setKey(e.target.value)}
+              placeholder="gsk_..."
+              style={{ ...inputStyle, flex: 1 }}
+            />
+            <button className="btn sm" onClick={save}>Save</button>
+          </div>
+          <button className="btn sm ghost" onClick={test} disabled={testing} style={{ alignSelf: 'flex-start' }}>
+            {testing ? 'Testing…' : '⚡ Test connection'}
+          </button>
+          {testResult === 'ok' && <span style={{ fontSize: 12, color: 'var(--status-done)' }}>✓ Connection successful</span>}
+          {testResult && testResult !== 'ok' && <span style={{ fontSize: 12, color: 'var(--rose)' }}>✗ {testResult}</span>}
+        </div>
+      </SetRow>
+      <SetRow title="AI Model" desc="Model used for all context-aware assistants.">
+        <div style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <Icon name="sparkle" size={13} style={{ color: 'var(--accent)' }} />
+          llama-3.3-70b-versatile
+        </div>
+      </SetRow>
+      <SetRow title="Code Editor Agent" desc="The AI inside the Code Editor uses the same key and can create, edit and run HTML/CSS/JS files.">
+        <span className="chip" style={{ color: 'var(--status-done)' }}><span className="d" style={{ background: 'var(--status-done)' }} /> enabled</span>
+      </SetRow>
+      <SetRow title="Contextual AI Panels" desc="Each view (PRs, Sprints, Issues, Team, Compute) has a role-specific AI that understands what's on screen.">
+        <span className="chip" style={{ color: 'var(--status-done)' }}><span className="d" style={{ background: 'var(--status-done)' }} /> enabled</span>
+      </SetRow>
+    </SetGroup>
+  );
+};
 
 const inputStyle = {
   background: "var(--bg-1)",

@@ -41,13 +41,12 @@
   window.openShare = (title) => window.__ui.openModal({ kind: "share", title });
   window.openPicker = (opts) => window.__ui.openModal({ kind: "picker", ...opts });
   window.openWeek = () => window.__ui.openModal({ kind: "week" });
-  window.openDigest = () => window.__ui.openModal({ kind: "digest" });
+  window.openDigest = () => window.openAI("Give me a daily digest of what happened, what I need to focus on, and any risks.", "general", { inbox: typeof INBOX !== 'undefined' ? INBOX : [], issues: typeof ISSUES !== 'undefined' ? ISSUES : [] });
   window.openFilter = (scope) => window.__ui.openModal({ kind: "filter", scope });
   window.openPR = (pr) => window.__ui.openModal({ kind: "pr-detail", pr });
   window.openProject = (project) => window.__ui.openModal({ kind: "project", project });
-  window.openSprintReport = () => window.__ui.openModal({ kind: "sprint-report" });
-  window.openRetro = () => window.__ui.openModal({ kind: "retro" });
-  window.openAI = (question) => window.__ui.openModal({ kind: "ai", question });
+  window.openSprintReport = () => window.openAI("Generate a sprint report for Iteration 42. Summarize completed work, carryover, and team velocity.", "sprint", { issues: typeof ISSUES !== 'undefined' ? ISSUES : [] });
+  window.openRetro = () => window.openAI("Draft a retrospective for the current sprint. Identify what went well, what didn't, and action items.", "sprint", { issues: typeof ISSUES !== 'undefined' ? ISSUES : [] });
   window.openTeammate = (user) => window.__ui.openModal({ kind: "teammate", user });
   window.openAttach = () => window.__ui.openModal({ kind: "attach" });
 })();

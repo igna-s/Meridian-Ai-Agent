@@ -1,0 +1,11 @@
+[
+  { "id": "u1", "name": "Amara Okafor", "handle": "amara", "hue": 300 },
+  { "id": "u2", "name": "Rohan Mehta", "handle": "rohan", "hue": 220 },
+  { "id": "u3", "name": "Kenji Ito", "handle": "kenji", "hue": 145 },
+  { "id": "u4", "name": "Sofía Ruiz", "handle": "sofia", "hue": 20 },
+  { "id": "u5", "name": "Lior Shapira", "handle": "lior", "hue": 75 },
+  { "id": "u6", "name": "Priya Raman", "handle": "priya", "hue": 340 },
+  { "id": "u7", "name": "Noah Bergström", "handle": "noah", "hue": 180 },
+  { "id": "u8", "name": "Aiyana Redcloud", "handle": "aiyana", "hue": 40 },
+  { "id": "u9", "name": "Tomás Velasco", "handle": "tomas", "hue": 260 }
+]

@@ -92,13 +92,9 @@ const ChatView = () => {
     const thinkingMsg = { id: typingId, text: '', sender: 'ai', timestamp: new Date(), status: 'Thinking...', steps: [] };
     setMessages(prev => [...prev, thinkingMsg]);
 
-    // Animate reasoning steps while waiting for the response
     const liveSteps = [
-      'Parsing query...',
-      'Searching issues and PRs...',
-      'Cross-referencing sprint data...',
-      'Analyzing team and roadmap...',
-      'Composing response...',
+      'Parsing query...', 'Searching issues and PRs...',
+      'Cross-referencing sprint data...', 'Analyzing team and roadmap...', 'Composing response...',
     ];
     let stepIdx = 0;
     const stepTimer = setInterval(() => {
@@ -107,48 +103,81 @@ const ChatView = () => {
         setMessages(prev => prev.map(msg =>
           msg.id === typingId ? { ...msg, steps: [...(msg.steps || []), step] } : msg
         ));
-      } else {
-        clearInterval(stepTimer);
-      }
+      } else { clearInterval(stepTimer); }
     }, 320);
 
     try {
+      const key = window.getGroqKey ? window.getGroqKey() : localStorage.getItem('meridian-groq-key') || '';
+      if (!key) throw new Error('NO_KEY');
+
       const history = messages.slice(-10).map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text
       })).filter(m => m.content);
 
-      const response = await fetch('/api/chat', {
+      clearInterval(stepTimer);
+
+      // Stream from Groq
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
         body: JSON.stringify({
-          query: text,
-          history
-        })
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 1024,
+          stream: true,
+          messages: [
+            { role: 'system', content: 'You are VaultMind AI, the intelligent assistant for Meridian — a modern project management platform. You help engineering teams with issues, PRs, sprints, roadmap, docs, and compute jobs. Be concise, insightful, and proactive. Use markdown formatting.' },
+            ...history,
+            { role: 'user', content: text },
+          ],
+        }),
       });
 
-      clearInterval(stepTimer);
-      if (!response.ok) throw new Error('Network response was not ok');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `Groq HTTP ${res.status}`);
+      }
 
-      const data = await response.json();
-      const finalSteps = data.reasoning_data?.steps || liveSteps;
+      // Read stream
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = '';
 
       setMessages(prev => prev.map(msg =>
-        msg.id === typingId ? {
-          ...msg,
-          text: data.response || 'No response received.',
-          status: null,
-          steps: finalSteps
-        } : msg
+        msg.id === typingId ? { ...msg, status: null, steps: liveSteps, text: '' } : msg
       ));
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n').filter(l => l.startsWith('data: ') && l !== 'data: [DONE]');
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line.slice(6));
+            const delta = data.choices?.[0]?.delta?.content || '';
+            if (delta) {
+              fullText += delta;
+              setMessages(prev => prev.map(msg =>
+                msg.id === typingId ? { ...msg, text: fullText } : msg
+              ));
+            }
+          } catch (_) {}
+        }
+      }
+
+      setMessages(prev => prev.map(msg =>
+        msg.id === typingId ? { ...msg, text: fullText, status: null, steps: liveSteps } : msg
+      ));
+
     } catch (error) {
       clearInterval(stepTimer);
-      console.error("Chat Error:", error);
+      console.error('Chat Error:', error);
+      const errText = error.message === 'NO_KEY'
+        ? '⚠ No API key found. Go to **Settings → AI & Integrations** to add your Groq key.'
+        : `⚠ ${error.message}`;
       setMessages(prev => prev.map(msg =>
-        msg.id === typingId ? { ...msg, text: 'Connection error — please try again.', status: null } : msg
+        msg.id === typingId ? { ...msg, text: errText, status: null } : msg
       ));
     } finally {
       setIsTyping(false);
