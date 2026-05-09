@@ -202,9 +202,7 @@ const AIPanelProvider = ({ children }) => {
       setMessages(m => [...m, { role: "assistant", content: accumulated }]);
       setStreamText("");
     } catch (e) {
-      const msg = e.message === "NO_KEY"
-        ? "⚠ No API key found. Go to Settings → AI & Integrations to add your Groq key."
-        : `⚠ ${e.message}`;
+      const msg = "(Hi, de api is disconected)";
       setMessages(m => [...m, { role: "assistant", content: msg }]);
       setStreamText("");
     } finally {
