@@ -2,9 +2,9 @@ const CodeEditorView = () => {
   const iframeRef = React.useRef(null);
 
   const sendKey = () => {
-    const key = window.getGroqKey ? window.getGroqKey() : localStorage.getItem('meridian-groq-key') || '';
-    if (key && iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({ type: 'GROQ_KEY', key }, '*');
+    const url = window.getAmdUrl ? window.getAmdUrl() : '';
+    if (url && iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.postMessage({ type: 'AMD_URL', url }, '*');
     }
   };
 

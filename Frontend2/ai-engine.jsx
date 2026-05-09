@@ -1,24 +1,19 @@
 // ── Meridian AI Engine ─────────────────────────────────────────────────────
-// Single shared AI backed by Groq API (OpenAI-compatible, llama-3.3-70b-versatile)
+// Single shared AI backed by an AMD vLLM Endpoint
 // Each view passes a `role` so the system prompt is context-aware.
+//
+// La URL del endpoint se configura en Settings → AI & Integrations
+// y se persiste en localStorage bajo la clave 'meridian-amd-endpoint'.
 
-const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const AMD_MODEL = "llama-3.3-70b-versatile";
+const LS_AMD_ENDPOINT = 'meridian-amd-endpoint';
 
-// Key is stored centrally in localStorage under "meridian-groq-key", or injected via Azure CI/CD
-const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
+const getAmdUrl = () => (localStorage.getItem(LS_AMD_ENDPOINT) || '').trim();
+const setAmdUrl = (url) => localStorage.setItem(LS_AMD_ENDPOINT, url.trim());
 
-const getGroqKey = () => {
-  const local = localStorage.getItem("meridian-groq-key");
-  if (local) return local.trim();
-  if (INJECTED_KEY && INJECTED_KEY !== "GROQ_API_KEY_PLACEHOLDER") return INJECTED_KEY;
-  return "";
-};
-const setGroqKey = (k) => localStorage.setItem("meridian-groq-key", k.trim());
-
-// Expose globally so all views and iframes can access
-window.getGroqKey = getGroqKey;
-window.setGroqKey = setGroqKey;
+// Exponer globalmente para que todos los views puedan acceder
+window.getAmdUrl = getAmdUrl;
+window.setAmdUrl = setAmdUrl;
 
 // ── System prompts per role ────────────────────────────────────────────────
 const ROLE_PROMPTS = {
@@ -91,9 +86,9 @@ Output cost estimates where possible.`,
 };
 
 // ── Core call function ─────────────────────────────────────────────────────
-async function groqChat({ role = "general", messages, contextData = null, onChunk = null }) {
-  const key = getGroqKey();
-  if (!key) throw new Error("NO_KEY");
+async function amdChat({ role = "general", messages, contextData = null, onChunk = null }) {
+  const url = getAmdUrl();
+  if (!url) throw new Error("AMD_URL_NOT_SET");
 
   const systemPrompt = ROLE_PROMPTS[role] || ROLE_PROMPTS.general;
   const contextBlock = contextData
@@ -101,7 +96,7 @@ async function groqChat({ role = "general", messages, contextData = null, onChun
     : "";
 
   const body = {
-    model: GROQ_MODEL,
+    model: AMD_MODEL,
     max_tokens: 1024,
     stream: !!onChunk,
     messages: [
@@ -110,18 +105,18 @@ async function groqChat({ role = "general", messages, contextData = null, onChun
     ],
   };
 
-  const res = await fetch(GROQ_ENDPOINT, {
+  const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${key}`,
+      "Authorization": `Bearer dummy-key`,
     },
     body: JSON.stringify(body),
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Groq HTTP ${res.status}`);
+    throw new Error(err.error?.message || `AMD API HTTP ${res.status}`);
   }
 
   // Streaming
@@ -194,7 +189,7 @@ const AIPanelProvider = ({ children }) => {
 
     try {
       let accumulated = "";
-      await groqChat({
+      await amdChat({
         role: r,
         messages: newHist,
         contextData: ctx,
@@ -367,7 +362,5 @@ const AIPanelProvider = ({ children }) => {
   );
 };
 
-window.groqChat = groqChat;
-window.getGroqKey = getGroqKey;
-window.setGroqKey = setGroqKey;
+window.amdChat = amdChat;
 window.AIPanelProvider = AIPanelProvider;

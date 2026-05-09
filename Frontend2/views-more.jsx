@@ -197,7 +197,7 @@ const PRsView = () => {
   const list = prs.filter(pr => filter === "all" || pr.status === filter);
 
   const runPRAnalysis = async () => {
-    const key = (window.getGroqKey ? window.getGroqKey() : localStorage.getItem('meridian-groq-key')) || '';
+    const key = window.getAmdUrl ? window.getAmdUrl() : '';
     if (!key) { window.openAI("Analyze all open pull requests", "pr", { prs: list }); return; }
     setAiOpen(true); setAiText(""); setAiLoading(true);
 
@@ -208,9 +208,9 @@ const PRsView = () => {
     }));
 
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch(key, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer dummy-key` },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile', max_tokens: 800, stream: true,
           messages: [

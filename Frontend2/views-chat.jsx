@@ -107,8 +107,8 @@ const ChatView = () => {
     }, 320);
 
     try {
-      const key = window.getGroqKey ? window.getGroqKey() : localStorage.getItem('meridian-groq-key') || '';
-      if (!key) throw new Error('NO_KEY');
+      const key = window.getAmdUrl ? window.getAmdUrl() : '';
+      if (!key) throw new Error('AMD_URL_NOT_SET');
 
       const history = messages.slice(-10).map(m => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
@@ -117,10 +117,10 @@ const ChatView = () => {
 
       clearInterval(stepTimer);
 
-      // Stream from Groq
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      // Stream from AMD
+      const res = await fetch(key, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer dummy-key` },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           max_tokens: 1024,
@@ -135,7 +135,7 @@ const ChatView = () => {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `Groq HTTP ${res.status}`);
+        throw new Error(err.error?.message || `AMD HTTP ${res.status}`);
       }
 
       // Read stream
@@ -173,8 +173,8 @@ const ChatView = () => {
     } catch (error) {
       clearInterval(stepTimer);
       console.error('Chat Error:', error);
-      const errText = error.message === 'NO_KEY'
-        ? '⚠ No API key found. Go to **Settings → AI & Integrations** to add your Groq key.'
+      const errText = error.message === 'AMD_URL_NOT_SET'
+        ? '⚠ No hay endpoint AMD configurado. Andá a **Settings → AI & Integrations** y pegá la URL de tu instancia AMD.'
         : `⚠ ${error.message}`;
       setMessages(prev => prev.map(msg =>
         msg.id === typingId ? { ...msg, text: errText, status: null } : msg

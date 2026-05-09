@@ -1,6 +1,6 @@
 // mock-api.jsx — simulated CRUD backend for demo mode (no real server needed)
 // Intercepts /api/issues, /api/prs, /api/docs fetch calls.
-// AI chat is handled by ai-engine.jsx → Groq directly (no mock needed).
+// AI chat is handled by ai-engine.jsx → AMD directly (no mock needed).
 // Must load after data.jsx.
 
 (function () {

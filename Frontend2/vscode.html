@@ -377,8 +377,8 @@
     <div id="sidebar-agent">
       <div class="sidebar-header">Code Agent</div>
       <div class="api-row">
-        <div class="api-label">Groq API Key</div>
-        <input type="password" class="api-input" id="api-key" placeholder="gsk_..." />
+        <div class="api-label">AMD Inference Endpoint URL</div>
+        <input type="text" class="api-input" id="api-key" placeholder="http://<IP>:8000/v1/chat/completions" />
       </div>
       <div class="agent-chat" id="agent-chat">
         <div class="chat-msg assistant">Hi! I'm your code agent. I can create, edit and run HTML, CSS and JS files. What would you like to build?</div>
@@ -453,17 +453,25 @@
 
 <script>
 // ── Constants ──────────────────────────────────────────────────────────
-const GROQ_URL   = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+const AMD_MODEL  = 'llama-3.3-70b-versatile';
 const LS_FILES   = 'meridian-vscode-files';
-const LS_KEY     = 'meridian-groq-key';
 
-// Receive API key from parent Meridian app via postMessage
+// URL del endpoint AMD (recibida desde el app padre via postMessage o heredada de window)
+let _amdUrlOverride = '';
+
+// Receive API endpoint URL from parent Meridian app via postMessage
 window.addEventListener('message', (e) => {
-  if (e.data?.type === 'GROQ_KEY' && e.data?.key) {
-    localStorage.setItem(LS_KEY, e.data.key);
+  if (e.data?.type === 'AMD_URL' && e.data?.url) {
+    _amdUrlOverride = e.data.url;
+    const apiInput = document.getElementById('api-key');
+    if (apiInput && !apiInput.value.trim()) apiInput.value = _amdUrlOverride;
   }
 });
+
+function getEffectiveAmdUrl() {
+  const fromInput = document.getElementById('api-key')?.value?.trim();
+  return fromInput || _amdUrlOverride || (window.getAmdUrl ? window.getAmdUrl() : '') || '';
+}
 
 // ── State ──────────────────────────────────────────────────────────────
 const files   = {};      // { name: content }
@@ -792,7 +800,7 @@ catch(e){parent.postMessage({type:'_meridian_result',logs:_L,error:e.message},'*
   });
 }
 
-// ── AI Agent (Groq / OpenAI-compatible) ───────────────────────────────
+// ── AI Agent (AMD vLLM Endpoint / OpenAI-compatible) ───────────────────────────────
 const SYSTEM = `You are a code agent embedded in the Meridian Code Editor. You create, edit and run web files (HTML, CSS, JavaScript) for the user.
 
 Rules:
@@ -803,7 +811,7 @@ Rules:
 - Be concise in chat — let the code speak.
 - Respond in English.`;
 
-// OpenAI-compatible function definitions for Groq
+// OpenAI-compatible function definitions for AMD Endpoint
 const TOOLS = [
   { type: 'function', function: { name: 'create_file', description: 'Create a new file with the given name and content. Use for HTML, CSS, JS.',
     parameters: { type:'object', properties: { name:{type:'string',description:'Filename, e.g. index.html'}, content:{type:'string',description:'Full file content'} }, required:['name','content'] } } },
@@ -845,16 +853,13 @@ function addToolMsg(name, input) {
 
 async function sendChat() {
   if (agentBusy) return;
-  // Prefer key from input; fall back to centralized localStorage key
-  const keyInput = document.getElementById('api-key').value.trim();
-  const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
-  const apiKey = keyInput || localStorage.getItem(LS_KEY) || (INJECTED_KEY !== "GROQ_API_KEY_PLACEHOLDER" ? INJECTED_KEY : '');
-  if (keyInput) localStorage.setItem(LS_KEY, keyInput); // sync back
+  // Prefer URL from input field; fall back to app-level AMD_ENDPOINT_URL
+  const amdUrl = getEffectiveAmdUrl();
 
   const inputEl = document.getElementById('chat-input');
   const msg = inputEl.value.trim();
   if (!msg) return;
-  if (!apiKey) { addMsg('err', '⚠ No API key. Enter your Groq key above or add it in Settings → AI.'); return; }
+  if (!amdUrl || amdUrl.includes('<IP-PUBLICA>')) { addMsg('err', '⚠ Endpoint AMD no configurado. Actualizá AMD_ENDPOINT_URL en ai-engine.jsx con la IP de tu instancia AMD.'); return; }
 
   inputEl.value = '';
   agentBusy = true;
@@ -865,7 +870,7 @@ async function sendChat() {
 
   const thinking = addMsg('thinking', '⋯ Thinking…');
   try {
-    await agentLoop(apiKey, thinking);
+    await agentLoop(amdUrl, thinking);
   } catch(e) {
     thinking.remove();
     addMsg('assistant', `⚠ API Error: ${e?.message || String(e)}`);
@@ -875,15 +880,15 @@ async function sendChat() {
   }
 }
 
-async function agentLoop(apiKey, thinkingEl) {
+async function agentLoop(amdUrl, thinkingEl) {
   let first = true;
   const MAX_ITERS = 8;
   for (let iter = 0; iter < MAX_ITERS; iter++) {
-    const res = await fetch(GROQ_URL, {
+    const res = await fetch(amdUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer dummy-key` },
       body: JSON.stringify({
-        model: GROQ_MODEL,
+        model: AMD_MODEL,
         max_tokens: 4096,
         messages: [{ role: 'system', content: SYSTEM }, ...agentHistory],
         tools: TOOLS,
@@ -893,7 +898,7 @@ async function agentLoop(apiKey, thinkingEl) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Groq HTTP ${res.status}`);
+      throw new Error(err.error?.message || `AMD API HTTP ${res.status}`);
     }
 
     const data = await res.json();
@@ -1157,14 +1162,12 @@ document.addEventListener('keydown', e => {
 // Load persisted files from localStorage
 loadPersistedFiles();
 
-// Pre-fill API key from centralized store
+// Pre-fill AMD endpoint URL desde la constante central (si el campo está vacío)
 (function() {
-  const k = localStorage.getItem(LS_KEY);
-  if (k) document.getElementById('api-key').value = k;
-  // Sync key changes back to centralized store
-  document.getElementById('api-key').addEventListener('change', function() {
-    if (this.value.trim()) localStorage.setItem(LS_KEY, this.value.trim());
-  });
+  const apiInput = document.getElementById('api-key');
+  if (apiInput && !apiInput.value.trim() && window.AMD_ENDPOINT_URL) {
+    apiInput.value = window.AMD_ENDPOINT_URL;
+  }
 })();
 
 setPanel('terminal');
@@ -1175,18 +1178,16 @@ async function createPR() {
   if (prBtn) { prBtn.disabled = true; prBtn.innerText = '⏳ Creating PR...'; }
 
   try {
-    const keyInput = document.getElementById('api-key').value.trim();
-    const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
-    const apiKey = keyInput || localStorage.getItem(LS_KEY) || (INJECTED_KEY !== "GROQ_API_KEY_PLACEHOLDER" ? INJECTED_KEY : '');
+    const amdUrl = getEffectiveAmdUrl();
     
-    if (!apiKey) throw new Error("No API key available to generate PR summary.");
+    if (!amdUrl || amdUrl.includes('<IP-PUBLICA>')) throw new Error("Endpoint AMD no configurado. Actualizá AMD_ENDPOINT_URL en ai-engine.jsx.");
     
     // Generate AI Summary based on code
     const fileContents = Object.entries(files).map(([name, content]) => `// File: ${name}\n${content}`).join('\n\n');
     
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch(amdUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer dummy-key` },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 200,
@@ -1198,7 +1199,7 @@ async function createPR() {
       })
     });
     
-    if (!res.ok) throw new Error("Failed to contact Groq API for PR summary.");
+    if (!res.ok) throw new Error("Failed to contact AMD API for PR summary.");
     
     const data = await res.json();
     const summary = JSON.parse(data.choices[0].message.content);

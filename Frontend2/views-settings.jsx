@@ -425,60 +425,102 @@ const PlaceholderSection = ({ title, desc }) => (
 );
 
 const AISection = () => {
-  const [key, setKey] = React.useState(() => localStorage.getItem('meridian-groq-key') || '');
+  const [url, setUrl] = React.useState(() => (window.getAmdUrl ? window.getAmdUrl() : '') || '');
+  const [saved, setSaved] = React.useState(false);
   const [testing, setTesting] = React.useState(false);
-  const [testResult, setTestResult] = React.useState(null);
+  const [testResult, setTestResult] = React.useState(null); // null | 'ok' | string(error)
 
   const save = () => {
-    localStorage.setItem('meridian-groq-key', key.trim());
-    window.toast('Groq API key saved');
+    if (window.setAmdUrl) window.setAmdUrl(url.trim());
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const test = async () => {
-    const k = key.trim();
-    if (!k) { window.toast('Enter a key first'); return; }
+    const u = url.trim();
+    if (!u) { window.toast('Ingresá la URL del endpoint primero'); return; }
+    // Auto-save before testing
+    if (window.setAmdUrl) window.setAmdUrl(u);
     setTesting(true); setTestResult(null);
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch(u, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${k}` },
-        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', max_tokens: 10, messages: [{ role: 'user', content: 'Reply: ok' }] })
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer dummy-key' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile', max_tokens: 5,
+          messages: [{ role: 'user', content: 'Reply: ok' }]
+        })
       });
-      if (res.ok) { setTestResult('ok'); localStorage.setItem('meridian-groq-key', k); }
-      else { const e = await res.json(); setTestResult(e.error?.message || 'Error'); }
-    } catch(e) { setTestResult(e.message); }
+      if (res.ok) { setTestResult('ok'); }
+      else { const e = await res.json().catch(() => ({})); setTestResult(e.error?.message || `HTTP ${res.status}`); }
+    } catch (e) { setTestResult(e.message); }
     setTesting(false);
   };
 
   return (
-    <SetGroup title="AI & Integrations" desc="Configure the AI provider used across all Meridian views — Code Editor, PR Analyst, Sprint Coach, and more.">
-      <SetRow title="Groq API Key" desc={<>Get your key at <strong>console.groq.com</strong>. Stored in browser localStorage only — never sent to any server.</>}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 320 }}>
+    <SetGroup title="AI & Integrations" desc="Configurá el proveedor AI usado en todas las vistas de Meridian — Code Editor, PR Analyst, Sprint Coach, y más.">
+      <SetRow
+        title="AMD Endpoint URL"
+        desc={<>Obtené la URL al correr <strong>deploy_amd_endpoint.sh</strong> en AMD Developer Cloud. Guardada en el navegador, nunca se envía a ningún servidor externo.</>}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 340 }}>
           <div style={{ display: 'flex', gap: 8 }}>
             <input
-              type="password" value={key}
-              onChange={e => setKey(e.target.value)}
-              placeholder="gsk_..."
-              style={{ ...inputStyle, flex: 1 }}
+              id="amd-endpoint-input"
+              type="text"
+              value={url}
+              onChange={e => { setUrl(e.target.value); setTestResult(null); }}
+              onKeyDown={e => e.key === 'Enter' && save()}
+              placeholder="http://<IP>:8000/v1/chat/completions"
+              style={{
+                ...inputStyle, flex: 1,
+                fontFamily: 'var(--font-mono)', fontSize: 11.5,
+                letterSpacing: url ? '0.04em' : 0,
+              }}
             />
-            <button className="btn sm" onClick={save}>Save</button>
+            <button
+              className="btn sm"
+              onClick={save}
+              style={{ minWidth: 52, background: saved ? 'var(--status-done)' : undefined, color: saved ? '#fff' : undefined }}
+            >
+              {saved ? '✓' : 'Save'}
+            </button>
           </div>
-          <button className="btn sm ghost" onClick={test} disabled={testing} style={{ alignSelf: 'flex-start' }}>
-            {testing ? 'Testing…' : '⚡ Test connection'}
+          <button
+            onClick={test}
+            disabled={testing}
+            style={{
+              background: 'none', border: 'none', padding: 0,
+              color: testing ? 'var(--fg-3)' : 'var(--accent)',
+              fontSize: 12, cursor: testing ? 'default' : 'pointer',
+              textAlign: 'left', width: 'fit-content',
+              textDecoration: 'underline', textDecorationStyle: 'dotted',
+            }}
+          >
+            {testing ? 'Probando conexión…' : '⚡ Test connection'}
           </button>
-          {testResult === 'ok' && <span style={{ fontSize: 12, color: 'var(--status-done)' }}>✓ Connection successful</span>}
-          {testResult && testResult !== 'ok' && <span style={{ fontSize: 12, color: 'var(--rose)' }}>✗ {testResult}</span>}
+          {testResult === 'ok' && (
+            <span style={{ fontSize: 11.5, color: 'var(--status-done)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              ✓ Conexión exitosa — endpoint AMD activo
+            </span>
+          )}
+          {testResult && testResult !== 'ok' && (
+            <span style={{ fontSize: 11.5, color: 'var(--rose)' }}>✗ {testResult}</span>
+          )}
         </div>
       </SetRow>
-      <SetRow title="AI Model" desc="Model used for all context-aware assistants.">
+
+      <SetRow title="AI Model" desc="Modelo usado por todos los asistentes con contexto.">
         <div style={{ ...inputStyle, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <Icon name="sparkle" size={13} style={{ color: 'var(--accent)' }} />
           llama-3.3-70b-versatile
         </div>
       </SetRow>
-      <SetRow title="Code Editor Agent" desc="The AI inside the Code Editor uses the same key and can create, edit and run HTML/CSS/JS files.">
+
+      <SetRow title="Code Editor Agent" desc="El AI dentro del Code Editor usa el mismo endpoint y puede crear, editar y correr archivos HTML/CSS/JS.">
         <span className="chip" style={{ color: 'var(--status-done)' }}><span className="d" style={{ background: 'var(--status-done)' }} /> enabled</span>
       </SetRow>
+
       <SetRow title="Contextual AI Panels" desc="Each view (PRs, Sprints, Issues, Team, Compute) has a role-specific AI that understands what's on screen.">
         <span className="chip" style={{ color: 'var(--status-done)' }}><span className="d" style={{ background: 'var(--status-done)' }} /> enabled</span>
       </SetRow>
