@@ -838,7 +838,8 @@ async function sendChat() {
   if (agentBusy) return;
   // Prefer key from input; fall back to centralized localStorage key
   const keyInput = document.getElementById('api-key').value.trim();
-  const apiKey = keyInput || localStorage.getItem(LS_KEY) || '';
+  const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
+  const apiKey = keyInput || localStorage.getItem(LS_KEY) || (INJECTED_KEY !== "GROQ_API_KEY_PLACEHOLDER" ? INJECTED_KEY : '');
   if (keyInput) localStorage.setItem(LS_KEY, keyInput); // sync back
 
   const inputEl = document.getElementById('chat-input');

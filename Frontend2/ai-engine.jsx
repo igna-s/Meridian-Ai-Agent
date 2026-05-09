@@ -5,8 +5,15 @@
 const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL    = "llama-3.3-70b-versatile";
 
-// Key is stored centrally in localStorage under "meridian-groq-key"
-const getGroqKey = () => localStorage.getItem("meridian-groq-key") || "";
+// Key is stored centrally in localStorage under "meridian-groq-key", or injected via Azure CI/CD
+const INJECTED_KEY = "GROQ_API_KEY_PLACEHOLDER";
+
+const getGroqKey = () => {
+  const local = localStorage.getItem("meridian-groq-key");
+  if (local) return local.trim();
+  if (INJECTED_KEY && INJECTED_KEY !== "GROQ_API_KEY_PLACEHOLDER") return INJECTED_KEY;
+  return "";
+};
 const setGroqKey = (k) => localStorage.setItem("meridian-groq-key", k.trim());
 
 // ── System prompts per role ────────────────────────────────────────────────
