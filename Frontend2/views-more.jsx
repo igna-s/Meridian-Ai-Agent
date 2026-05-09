@@ -27,7 +27,7 @@ const SprintsView = ({ setView, setIssueId }) => {
         <div className="topbar-spacer" />
         <button className="btn ghost sm" onClick={() => window.openSprintReport()}><Icon name="download" size={13} /> Report</button>
         <button className="btn ghost sm" onClick={() => window.openRetro()}><Icon name="sparkle" size={13} /> Retrospective draft</button>
-        <button className="btn ghost sm" onClick={() => window.openAI("Summarize Iteration 42 progress")}><Icon name="sparkle" size={13} /> AI Summary</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("Summarize Iteration 42 progress", "sprint", { issues: sprintIssues })}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm" onClick={() => { if(confirm("Complete iteration 42? 22pts will move to backlog.")) window.toast("Iteration 42 closed"); }}>Complete iteration</button>
       </div>
 
@@ -343,7 +343,7 @@ const TeamView = () => {
           <Icon name="search" size={12} />
           <input placeholder="Find a teammate…" />
         </div>
-        <button className="btn ghost sm" onClick={() => window.openAI("Who has the highest workload this sprint?")}><Icon name="sparkle" size={13} /> AI Summary</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("Who has the highest workload this sprint?", "team", { people: typeof PEOPLE !== 'undefined' ? PEOPLE : [] })}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openInvite()}><Icon name="plus" size={13} /> Invite</button>
       </div>
 

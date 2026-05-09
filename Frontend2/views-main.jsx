@@ -351,7 +351,7 @@ const IssuesView = ({ setView, setIssueId, cardStyle }) => {
           <button className={mode === "list" ? "on" : ""} onClick={() => setMode("list")}><Icon name="list" size={13} /> List</button>
           <button className={mode === "timeline" ? "on" : ""} onClick={() => setMode("timeline")}><Icon name="timeline" size={13} /> Timeline</button>
         </div>
-        <button className="btn ghost sm" onClick={() => window.openAI("What are the top blocking issues right now?")}><Icon name="sparkle" size={13} /> AI Summary</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("What are the top blocking issues right now?", "general", { issues })}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openNewIssue()}><Icon name="plus" size={13} /> New issue</button>
       </div>
 

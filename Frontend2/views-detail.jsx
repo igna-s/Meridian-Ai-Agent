@@ -174,7 +174,7 @@ compositing  0.8ms  ← budget OK
                   <button className="icon-btn" title="Attach" onClick={() => window.openAttach()}><Icon name="attach" size={13} /></button>
                   <button className="icon-btn" title="Code" onClick={() => window.toast("Insert code block")}><Icon name="hash" size={13} /></button>
                   <button className="icon-btn" title="Mention" onClick={() => window.toast("Mention teammate")}><Icon name="at" size={13} /></button>
-                  <button className="icon-btn" title="AI" onClick={() => window.openAI("What's blocking Aurora?")}><Icon name="sparkle" size={13} /></button>
+                  <button className="icon-btn" title="AI" onClick={() => window.openAI(`What's blocking ${proj?.name || 'this project'}?`, "general", { issue })}><Icon name="sparkle" size={13} /></button>
                   <div style={{ flex: 1 }} />
                   <span className="mono muted-2" style={{ fontSize: 10.5 }}>⌘↵ to send</span>
                   <button className="btn sm primary" onClick={() => {
@@ -359,7 +359,7 @@ const DocsView = () => {
           <button className="btn ghost sm" onClick={() => window.toast("Watching this doc") }><Icon name="eye" size={13} /> 8</button>
           <div className="vdivider" style={{ height: 20 }} />
           <AvatarStack users={[PEOPLE[1], PEOPLE[2], PEOPLE[4]]} size="xs" />
-          <button className="btn ghost sm" onClick={() => window.openAI("Summarize this doc")}><Icon name="sparkle" size={13} /> Ask AI</button>
+          <button className="btn ghost sm" onClick={() => window.openAI("Summarize this doc", "general", { doc: docs.find(d => d.id === selected) || {} })}><Icon name="sparkle" size={13} /> Ask AI</button>
           <button className="btn sm primary" onClick={() => window.openShare("ADR 041 — Canvas rendering pipeline")}><Icon name="plus" size={13} /> Share</button>
         </div>
 
@@ -462,7 +462,7 @@ const RoadmapView = () => {
           <button onClick={() => window.openPicker({ title: "Milestones", options: [{ value: "m1", label: "Aurora launch · Jun 12" }, { value: "m2", label: "SSO audit · Jul 1" }, { value: "m3", label: "Tessera 2.0 · Aug 22" }], onChoose: (o) => window.toast(o.label) })}>Milestones</button>
         </div>
         <button className="btn ghost sm" onClick={() => window.openPicker({ title: "Filter projects", options: PROJECTS.map(p => ({ value: p.id, label: p.name, swatch: p.color })), onChoose: (o) => window.toast(`Filtered to ${o.label}`) })}><Icon name="filter" size={13} /> Projects: all</button>
-        <button className="btn ghost sm" onClick={() => window.openAI("What milestones are at risk this quarter?")}><Icon name="sparkle" size={13} /> AI Summary</button>
+        <button className="btn ghost sm" onClick={() => window.openAI("What milestones are at risk this quarter?", "general", { roadmap: typeof ROADMAP !== 'undefined' ? ROADMAP : [] })}><Icon name="sparkle" size={13} /> AI Summary</button>
         <button className="btn sm primary" onClick={() => window.openNewIssue({ kind: "initiative" })}><Icon name="plus" size={13} /> New initiative</button>
       </div>
 
