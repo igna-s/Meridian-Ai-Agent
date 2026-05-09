@@ -382,9 +382,13 @@ const IntegrationsSection = () => {
     { name: "GitHub", desc: "Link PRs, sync commits, auto-close issues.", connected: true, kind: "git" },
     { name: "Slack", desc: "Notifications in channels, slash-commands.", connected: true, kind: "message" },
     { name: "Figma", desc: "Embed frames in issues and docs.", connected: true, kind: "component" },
+    { name: "Jira", desc: "Two-way sync for enterprise migration.", connected: true, kind: "issues" },
+    { name: "Sentry", desc: "Auto-create issues from new errors.", connected: true, kind: "flag" },
+    { name: "GitLab", desc: "Sync merge requests and pipelines.", connected: true, kind: "git" },
+    { name: "Datadog", desc: "Attach monitor alerts to incidents.", connected: true, kind: "chart" },
+    { name: "Zoom", desc: "Create meeting links in issues automatically.", connected: true, kind: "video" },
     { name: "Linear", desc: "One-way migration of issues.", connected: false, kind: "issues" },
     { name: "Notion", desc: "Import pages as Meridian docs.", connected: false, kind: "docs" },
-    { name: "Sentry", desc: "Auto-create issues from new errors.", connected: false, kind: "flag" },
   ];
   return (
     <SetGroup title="Connected apps" desc="Meridian plays well with the rest of your stack.">
