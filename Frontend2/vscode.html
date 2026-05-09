@@ -860,7 +860,7 @@ async function sendChat() {
     await agentLoop(apiKey, thinking);
   } catch(e) {
     thinking.remove();
-    addMsg('assistant', '(Hi, de api is disconected)');
+    addMsg('assistant', `⚠ API Error: ${e?.message || String(e)}`);
   } finally {
     agentBusy = false;
     document.getElementById('chat-send').disabled = false;
@@ -1215,7 +1215,7 @@ async function createPR() {
       termLine('err', '✗ Could not connect to parent app window to create PR.');
     }
   } catch (err) {
-    termLine('err', `(Hi, de api is disconected)`);
+    termLine('err', `⚠ API Error: ${err?.message || String(err)}`);
   } finally {
     if (prBtn) { prBtn.disabled = false; prBtn.innerText = '⚑ Create PR'; }
   }

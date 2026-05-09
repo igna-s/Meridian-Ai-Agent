@@ -202,7 +202,7 @@ const AIPanelProvider = ({ children }) => {
       setMessages(m => [...m, { role: "assistant", content: accumulated }]);
       setStreamText("");
     } catch (e) {
-      const msg = "(Hi, de api is disconected)";
+      const msg = `⚠ API Error: ${e?.message || String(e)}`;
       setMessages(m => [...m, { role: "assistant", content: msg }]);
       setStreamText("");
     } finally {

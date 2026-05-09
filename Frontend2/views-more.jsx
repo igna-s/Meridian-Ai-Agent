@@ -226,7 +226,7 @@ const PRsView = () => {
           try { const delta = JSON.parse(line.slice(6)).choices?.[0]?.delta?.content || ''; full += delta; setAiText(full); } catch(_) {}
         }
       }
-    } catch(e) { setAiText("(Hi, de api is disconected)"); }
+    } catch(e) { setAiText(`⚠ API Error: ${e?.message || String(e)}`); }
     setAiLoading(false);
   };
 
