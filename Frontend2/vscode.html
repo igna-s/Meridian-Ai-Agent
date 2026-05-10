@@ -918,7 +918,10 @@ async function agentLoop(amdUrl, thinkingEl) {
     agentHistory.push(msg);
 
     // Text content
-    if (msg.content) addMsg('assistant', msg.content);
+    if (msg.content) {
+      msg.content = msg.content.replace(/Ġ/g, ' ').replace(/Ċ/g, '\n').replace(/ď/g, "'").replace(/č/g, "c");
+      addMsg('assistant', msg.content);
+    }
 
     // Tool calls (OpenAI format)
     const toolCalls = msg.tool_calls || [];
@@ -1209,7 +1212,9 @@ async function createPR() {
     if (!res.ok) throw new Error("Failed to contact AMD API for PR summary.");
     
     const data = await res.json();
-    const summary = JSON.parse(data.choices[0].message.content);
+    let content = data.choices[0].message.content || '{}';
+    content = content.replace(/Ġ/g, ' ').replace(/Ċ/g, '\n').replace(/ď/g, "'").replace(/č/g, "c");
+    const summary = JSON.parse(content);
     
     // Count rough lines of code for additions
     let lines = 0;
