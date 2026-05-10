@@ -36,7 +36,7 @@ echo "🔥 Levantando el endpoint de inferencia..."
 echo "⚠️  Nota: La primera vez va a tardar un rato en descargar el modelo de HuggingFace (~130GB)."
 echo "🌐 El servidor quedará escuchando en el puerto $PORT"
 
-sudo docker run -it --rm \
+sudo docker run -d --restart unless-stopped \
   --network=host \
   --device=/dev/kfd \
   --device=/dev/dri \
