@@ -117,6 +117,22 @@ const ChatView = () => {
 
       clearInterval(stepTimer);
 
+      // Gather workspace context for the AI
+      const workspaceData = {
+        issues: window.ISSUES || [],
+        prs: window.PRS || [],
+        projects: window.PROJECTS || [],
+        people: window.PEOPLE || []
+      };
+      // Keep it somewhat brief to avoid token limits, send top items
+      const trimmedData = {
+        issues: workspaceData.issues.slice(0, 40),
+        prs: workspaceData.prs.slice(0, 20),
+        projects: workspaceData.projects.slice(0, 10),
+      };
+      const contextBlock = `\n\n--- LIVE WORKSPACE DATA ---\n${JSON.stringify(trimmedData, null, 2)}\n--- END DATA ---`;
+      const systemPrompt = 'You are VaultMind AI, the intelligent assistant for Meridian — a modern project management platform. You help engineering teams with issues, PRs, sprints, roadmap, docs, and compute jobs. Be concise, insightful, and proactive. Use markdown formatting.' + contextBlock;
+
       // Stream from AMD
       const res = await fetch(key, {
         method: 'POST',
@@ -126,7 +142,7 @@ const ChatView = () => {
           max_tokens: 1024,
           stream: true,
           messages: [
-            { role: 'system', content: 'You are VaultMind AI, the intelligent assistant for Meridian — a modern project management platform. You help engineering teams with issues, PRs, sprints, roadmap, docs, and compute jobs. Be concise, insightful, and proactive. Use markdown formatting.' },
+            { role: 'system', content: systemPrompt },
             ...history,
             { role: 'user', content: text },
           ],
