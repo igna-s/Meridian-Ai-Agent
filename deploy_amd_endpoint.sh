@@ -48,7 +48,6 @@ sudo docker run -d --restart unless-stopped \
   --gpu-memory-utilization 0.95 \
   --dtype bfloat16 \
   --port $PORT \
-  --cors-allowed-origins "*" \
   --served-model-name "llama-3.3-70b-versatile" # Ocultamos el nombre real para que el Frontend no tenga que cambiar nada
 
 # ==============================================================================
