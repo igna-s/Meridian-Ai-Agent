@@ -8,7 +8,7 @@ set -e
 
 # Configuration
 MODEL_ID="deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
-PORT=8000
+PORT=80
 
 echo "🚀 Iniciando despliegue de Inferencia en AMD MI300X..."
 echo "📦 Modelo seleccionado: $MODEL_ID"
@@ -48,14 +48,15 @@ sudo docker run -d --restart unless-stopped \
   --gpu-memory-utilization 0.95 \
   --dtype bfloat16 \
   --port $PORT \
+  --cors-allowed-origins "*" \
   --served-model-name "llama-3.3-70b-versatile" # Ocultamos el nombre real para que el Frontend no tenga que cambiar nada
 
 # ==============================================================================
 # INSTRUCCIONES PARA CONECTAR MERIDIAN
 # ==============================================================================
-# Una vez que la terminal diga "Uvicorn running on http://0.0.0.0:8000"
+# Una vez que la terminal diga "Uvicorn running on http://0.0.0.0:80"
 # 1. Copiá la IP pública de esta máquina
 # 2. Andá a Settings -> AI & Integrations en Meridian
 # 3. Pegá esto en donde pide la URL (si hiciste un input para URL) 
 #    O modifícalo en `ai-engine.jsx`:
-#    const AMD_ENDPOINT = "http://<IP-PUBLICA>:8000/v1/chat/completions";
+#    const AMD_ENDPOINT = "http://<IP-PUBLICA>/v1/chat/completions";
