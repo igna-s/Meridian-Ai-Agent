@@ -142,6 +142,7 @@ const ChatView = () => {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
+      let buffer = '';
 
       setMessages(prev => prev.map(msg =>
         msg.id === typingId ? { ...msg, status: null, steps: liveSteps, text: '' } : msg
@@ -150,19 +151,26 @@ const ChatView = () => {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(l => l.startsWith('data: ') && l !== 'data: [DONE]');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep incomplete chunk
+        
         for (const line of lines) {
-          try {
-            const data = JSON.parse(line.slice(6));
-            const delta = data.choices?.[0]?.delta?.content || '';
-            if (delta) {
-              fullText += delta;
-              setMessages(prev => prev.map(msg =>
-                msg.id === typingId ? { ...msg, text: fullText } : msg
-              ));
-            }
-          } catch (_) {}
+          const l = line.trim();
+          if (l.startsWith('data: ') && l !== 'data: [DONE]') {
+            try {
+              const data = JSON.parse(l.slice(6));
+              let delta = data.choices?.[0]?.delta?.content || '';
+              if (delta) {
+                // Fix tokenizer artifacts for Llama/BPE
+                delta = delta.replace(/Ġ/g, ' ').replace(/Ċ/g, '\n').replace(/ď/g, "'").replace(/č/g, "c");
+                fullText += delta;
+                setMessages(prev => prev.map(msg =>
+                  msg.id === typingId ? { ...msg, text: fullText } : msg
+                ));
+              }
+            } catch (_) {}
+          }
         }
       }
 
