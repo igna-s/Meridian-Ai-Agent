@@ -19,7 +19,7 @@ const ReasoningSteps = ({ steps, status }) => {
 
   return (
     <div className="flex col gap-8 mb-8" style={{ background: 'var(--bg-1)', padding: 12, borderRadius: 8, border: '1px solid var(--border)', cursor: 'pointer' }}
-         onClick={() => setIsExpanded(!isExpanded)}>
+      onClick={() => setIsExpanded(!isExpanded)}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-8">
           {status ? <Icon name="bolt" size={12} style={{ color: 'var(--accent)' }} /> : <Icon name="check" size={12} style={{ color: 'var(--status-done)' }} />}
@@ -124,14 +124,15 @@ const ChatView = () => {
         projects: window.PROJECTS || [],
         people: window.PEOPLE || []
       };
-      // Keep it somewhat brief to avoid token limits, send top items
+      
       const trimmedData = {
         issues: workspaceData.issues.slice(0, 40),
         prs: workspaceData.prs.slice(0, 20),
         projects: workspaceData.projects.slice(0, 10),
       };
+      
       const contextBlock = `\n\n--- LIVE WORKSPACE DATA ---\n${JSON.stringify(trimmedData, null, 2)}\n--- END DATA ---`;
-      const systemPrompt = 'You are VaultMind AI, the intelligent assistant for Meridian — a modern project management platform. You help engineering teams with issues, PRs, sprints, roadmap, docs, and compute jobs. Be concise, insightful, and proactive. Use markdown formatting.' + contextBlock;
+      const systemPrompt = 'You are VaultMind AI, the intelligent assistant for Meridian — a modern project management platform. You help engineering teams with issues, PRs, sprints, roadmap, docs, and compute jobs. \n\nCRITICAL INSTRUCTION: You MUST be extremely concise. This is a fast-paced demo. Do NOT write introductory filler, do NOT explain your thought process, and do NOT write long paragraphs. Give short, direct, punchy answers (maximum 2-3 short sentences or a very brief bulleted list). Go straight to the point.' + contextBlock;
 
       // Stream from AMD
       const res = await fetch(key, {
@@ -139,7 +140,7 @@ const ChatView = () => {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer dummy-key` },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          max_tokens: 1024,
+          max_tokens: 512,
           stream: true,
           messages: [
             { role: 'system', content: systemPrompt },
@@ -170,7 +171,7 @@ const ChatView = () => {
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
         buffer = lines.pop(); // keep incomplete chunk
-        
+
         for (const line of lines) {
           const l = line.trim();
           if (l.startsWith('data: ') && l !== 'data: [DONE]') {
@@ -185,7 +186,7 @@ const ChatView = () => {
                   msg.id === typingId ? { ...msg, text: fullText } : msg
                 ));
               }
-            } catch (_) {}
+            } catch (_) { }
           }
         }
       }
@@ -244,12 +245,12 @@ const ChatView = () => {
               <div style={{ fontSize: 13, color: 'var(--fg-3)', marginBottom: 32 }}>Ask me about your projects, issues, PRs, or team.</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%' }}>
                 {[
-                  { icon: 'sprint',   text: "What's the status of Iteration 42?" },
-                  { icon: 'issues',   text: "What's blocking the team right now?" },
-                  { icon: 'pr',       text: "Which PRs need attention?" },
-                  { icon: 'team',     text: "Who has capacity for new work?" },
-                  { icon: 'roadmap',  text: "Which milestones are at risk this quarter?" },
-                  { icon: 'sparkle',  text: "Give me today's standup brief" },
+                  { icon: 'sprint', text: "What's the status of Iteration 42?" },
+                  { icon: 'issues', text: "What's blocking the team right now?" },
+                  { icon: 'pr', text: "Which PRs need attention?" },
+                  { icon: 'team', text: "Who has capacity for new work?" },
+                  { icon: 'roadmap', text: "Which milestones are at risk this quarter?" },
+                  { icon: 'sparkle', text: "Give me today's standup brief" },
                 ].map((p, i) => (
                   <button key={i} onClick={() => { if (!isTyping) sendMessage(p.text); }}
                     style={{ textAlign: 'left', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--bg-1)', cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 13, color: 'var(--fg-1)', transition: 'border-color 0.15s' }}
