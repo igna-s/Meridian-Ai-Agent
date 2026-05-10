@@ -124,17 +124,27 @@ async function amdChat({ role = "general", messages, contextData = null, onChunk
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let fullText = "";
+    let buffer = "";
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split("\n").filter(l => l.startsWith("data: ") && l !== "data: [DONE]");
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop(); // keep the last incomplete line in the buffer
       for (const line of lines) {
-        try {
-          const data = JSON.parse(line.slice(6));
-          const delta = data.choices?.[0]?.delta?.content || "";
-          if (delta) { fullText += delta; onChunk(delta, fullText); }
-        } catch (_) { }
+        const l = line.trim();
+        if (l.startsWith("data: ") && l !== "data: [DONE]") {
+          try {
+            const data = JSON.parse(l.slice(6));
+            let delta = data.choices?.[0]?.delta?.content || "";
+            if (delta) { 
+              // Fix tokenizer artifacts for some models
+              delta = delta.replace(/Ġ/g, ' ').replace(/Ċ/g, '\n').replace(/ď/g, "'").replace(/č/g, "c");
+              fullText += delta; 
+              onChunk(delta, fullText); 
+            }
+          } catch (_) { }
+        }
       }
     }
     return fullText;
@@ -142,7 +152,9 @@ async function amdChat({ role = "general", messages, contextData = null, onChunk
 
   // Non-streaming
   const data = await res.json();
-  return data.choices?.[0]?.message?.content || "";
+  let text = data.choices?.[0]?.message?.content || "";
+  text = text.replace(/Ġ/g, ' ').replace(/Ċ/g, '\n');
+  return text;
 }
 
 // ── Floating AI Panel ──────────────────────────────────────────────────────

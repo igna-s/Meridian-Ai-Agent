@@ -433,7 +433,12 @@
         </div>
       </div>
       <div class="terminal-body" id="terminal-body">
-        <div><span class="t-prompt">$</span> <span class="t-cursor"></span></div>
+        <div><span class="t-out" style="color:#858585">Meridian Code Editor ready. Ask the AI agent or press + to create a file.</span></div>
+        <div><span class="t-ok">✓</span> <span class="t-out">Session storage active — files persist across refreshes.</span></div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:4px" class="t-input-line">
+          <span class="t-prompt">$</span> 
+          <input type="text" class="t-actual-input" style="background:none; border:none; color:#ccc; outline:none; font-family:inherit; font-size:inherit; flex:1" placeholder="Type a prompt for the AI agent and press Enter..." onkeydown="if(event.key==='Enter' && this.value.trim()) { setSidebar('agent'); document.getElementById('chat-input').value = this.value; sendChat(); this.value=''; }">
+        </div>
       </div>
       <div class="preview-body" id="preview-body">
         <iframe class="preview-iframe" id="preview-iframe" sandbox="allow-scripts allow-same-origin"></iframe>
@@ -714,13 +719,15 @@ function toggleExpand() {
 // ── Terminal ────────────────────────────────────────────────────────────
 function termWrite(html) {
   const body = document.getElementById('terminal-body');
-  const cur  = body.querySelector('.t-cursor');
-  if (cur) cur.closest('div').remove();
+  const cur = body.querySelector('.t-input-line');
+  if (cur) cur.remove();
   const el = document.createElement('div');
   el.innerHTML = html;
   body.appendChild(el);
   const curLine = document.createElement('div');
-  curLine.innerHTML = '<span class="t-prompt">$</span> <span class="t-cursor"></span>';
+  curLine.className = 't-input-line';
+  curLine.style = 'display:flex; align-items:center; gap:6px; margin-top:4px';
+  curLine.innerHTML = `<span class="t-prompt">$</span> <input type="text" class="t-actual-input" style="background:none; border:none; color:#ccc; outline:none; font-family:inherit; font-size:inherit; flex:1" placeholder="Type a prompt for the AI agent and press Enter..." onkeydown="if(event.key==='Enter' && this.value.trim()) { setSidebar('agent'); document.getElementById('chat-input').value = this.value; sendChat(); this.value=''; }">`;
   body.appendChild(curLine);
   body.scrollTop = body.scrollHeight;
 }
@@ -732,7 +739,7 @@ function termCmd(cmd) {
   termWrite(`<span class="t-prompt">$</span> <span class="t-cmd">${esc(cmd)}</span>`);
 }
 function clearTerm() {
-  document.getElementById('terminal-body').innerHTML = '<div><span class="t-prompt">$</span> <span class="t-cursor"></span></div>';
+  document.getElementById('terminal-body').innerHTML = `<div style="display:flex; align-items:center; gap:6px; margin-top:4px" class="t-input-line"><span class="t-prompt">$</span> <input type="text" class="t-actual-input" style="background:none; border:none; color:#ccc; outline:none; font-family:inherit; font-size:inherit; flex:1" placeholder="Type a prompt for the AI agent and press Enter..." onkeydown="if(event.key==='Enter' && this.value.trim()) { setSidebar('agent'); document.getElementById('chat-input').value = this.value; sendChat(); this.value=''; }"></div>`;
 }
 
 // ── Run ────────────────────────────────────────────────────────────────
